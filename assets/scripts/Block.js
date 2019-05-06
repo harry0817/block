@@ -39,5 +39,10 @@ cc.Class({
 
     },
 
+    setPoint: function (point) {
+        this.point = point;
+        this.pointLabel.string = point;
+    }
+
     // update (dt) {},
 });
