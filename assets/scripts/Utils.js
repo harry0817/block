@@ -1,4 +1,3 @@
-
 function randomNum(minNum, maxNum) {
     switch (arguments.length) {
         case 1:
@@ -14,5 +13,5 @@ function randomNum(minNum, maxNum) {
 }
 
 module.exports = {
-    randomNum: randomNum,
+    randomNum: randomNum
 };

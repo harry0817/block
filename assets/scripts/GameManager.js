@@ -1,5 +1,5 @@
-
 var Utils = require('Utils');
+var BlockState = require('BlockState');
 
 cc.Class({
     extends: cc.Component,
@@ -9,23 +9,15 @@ cc.Class({
         rowCount: 7,
         paddingLeft: 0,
         paddingRight: 0,
-        blockSize: {
-            default: new cc.Vec2(),
-            type: cc.Vec2
-        },
-        blockSizeRatio: {
-            default: new cc.Vec2(),
-            type: cc.Vec2
-        },
+        paddingTop: 0,
+        paddingBottom: 0,
+        spacing: new cc.Vec2(),
+        blockSize: new cc.Vec2(),
+        blockSizeRatio: new cc.Vec2(),
         moveDuration: 1,
-        gamePanel: {
-            default: null,
-            type: cc.Node
-        },
-        blockPrefab: {
-            default: null,
-            type: cc.Prefab
-        }
+        gamePanel: cc.Node,
+        blockPrefab: cc.Prefab,
+        blockSpriteFrame: [cc.SpriteFrame]
     },
 
     onLoad() {
@@ -41,9 +33,11 @@ cc.Class({
                 this.blockArr[i][j] = null;
             }
         }
-        this.blockSize.x = (this.gamePanel.width - this.paddingLeft - this.paddingRight) / 5;
+        this.blockSize.x = (this.gamePanel.width - this.paddingLeft - this.paddingRight) / this.colCount - this.spacing.x;
         this.blockSize.y = this.blockSize.x * this.blockSizeRatio.y / this.blockSizeRatio.x;
-        this.gamePanel.height = this.blockSize.y * 8;
+        this.gamePanel.height = this.paddingTop + this.paddingBottom + (this.rowCount + 1) * this.blockSize.y + this.rowCount * this.spacing.y;
+        console.log('block:' + this.blockSize);
+        console.log('gamePanel:(' + this.gamePanel.width + ',' + this.gamePanel.height + ')');
 
         this.generateBlock();
     },
@@ -107,15 +101,12 @@ cc.Class({
                 if (emptyRow == -1) {
                     if (block == null) {
                         emptyRow = row;
-                        console.log('第' + row + '行,第' + col + '列空');
-
                     }
                 } else {
                     if (block != null) {
                         this.tempSettlingBlockArr.push(block);
                         let movingAction = this.generateAction(block, emptyRow, col);
                         this.tempSettlingActionArr.push(movingAction);
-                        console.log('tempSettlingActionArr:' + this.tempSettlingActionArr.length);
                         break;
                     }
                 }
@@ -142,52 +133,15 @@ cc.Class({
         }
     },
 
-    generateAction: function (block, row, col, upgrade = false, point = 0) {
-        let movingAction = new Object();
-        movingAction.block = block;
-        movingAction.toRow = row;
-        movingAction.toCol = col;
-        movingAction.upgrade = upgrade;
-        movingAction.point = point;
-        return movingAction;
-    },
-
     combineBlock: function () {
         console.log('combineBlock');
         let tempMovingBlockArr = this.tempSettlingBlockArr.concat(this.tempCombiningBlockArr);
         let tempCombiningBlockMap = new Map();
-        console.log('tempMovingBlockArr:' + tempMovingBlockArr.length);
-
+        this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
         this.tempCombiningBlockArr.splice(0, this.tempCombiningBlockArr.length);
-        this.tempCombiningActionArr.splice(0, this.tempCombiningActionArr.length);
         for (let i = 0; i < tempMovingBlockArr.length; i++) {
-            let block = tempMovingBlockArr[i];
-            let row = block.row;
-            let col = block.col;
-            if (row > 0 && this.blockArr[row - 1][col] != null) {//上
-                if (this.blockArr[row - 1][col].point == block.point) {
-                    console.log('上');
-                    let movingAction = this.generateAction(block, row - 1, col);
-                    this.tempCombiningActionArr.push(movingAction);
-                    //TODO
-
-                }
-            } else {
-                if (col > 0 && this.blockArr[row][col - 1] != null) {//左
-                    if (this.blockArr[row][col - 1].point == block.point) {
-                        console.log('左');
-                        let movingAction = this.generateAction(this.blockArr[row][col - 1], row, col);
-                        this.tempCombiningActionArr.push(movingAction);
-                    }
-                }
-                if (col < this.colCount - 1 && this.blockArr[row][col + 1] != null) {//右
-                    if (this.blockArr[row][col + 1].point == block.point) {
-                        console.log('右');
-                        let movingAction = this.generateAction(this.blockArr[row][col + 1], row, col);
-                        this.tempCombiningActionArr.push(movingAction);
-                    }
-                }
-            }
+            console.log('tempMovingBlock:' + tempMovingBlockArr[i].col + ',' + tempMovingBlockArr[i].row);
+            this.findCombineBlock(tempMovingBlockArr[i]);
         }
 
         if (this.tempCombiningActionArr.length > 0) {
@@ -211,18 +165,18 @@ cc.Class({
             for (let i = 0; i < this.tempCombiningActionArr.length; i++) {
                 let movingAction = this.tempCombiningActionArr[i];
                 let block = movingAction.block;
-                this.tempCombiningBlockArr.push(block);
                 if (movingAction.upgrade) {//加分
                     this.scheduleOnce(function () {
                         block.setPoint(movingAction.point);
+                        block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(movingAction.point)]);
                     }, this.moveDuration);
                 } else {//移动
                     let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
                     let action = cc.moveTo(this.moveDuration, position);
                     block.node.runAction(action);
                     this.scheduleOnce(function () {
-                        this.blockArr[block.row][block.col] = null;
                         block.node.destroy();
+                        this.blockArr[block.row][block.col] = null;
                     }, this.moveDuration);
                 }
             }
@@ -234,6 +188,92 @@ cc.Class({
         }
     },
 
+    generateAction: function (block, row, col, upgrade = false, point = 0) {
+        let movingAction = new Object();
+        movingAction.block = block;
+        movingAction.toRow = row;
+        movingAction.toCol = col;
+        movingAction.upgrade = upgrade;
+        movingAction.point = point;
+        return movingAction;
+    },
+
+    findCombineBlock: function (block) {
+        if (block == null || this.tempCombiningBlockArr.indexOf(block) != -1) {
+            return;
+        }
+        console.log('findCombineBlock:' + block.col + ',' + block.row);
+
+        let row = block.row;
+        let col = block.col;
+        let topBlock = this.findTop(block);
+        let leftBlock = this.findLeft(block);
+        let rightBlock = this.findRight(block);
+        if (topBlock != null && leftBlock == null && rightBlock == null) {//只有上方有
+            let movingAction = this.generateAction(block, topBlock.row, topBlock.col);
+            this.tempCombiningActionArr.push(movingAction);
+            this.tempCombiningBlockArr.push(topBlock);
+        } else {
+            if (topBlock != null) {//上
+                let movingAction = this.generateAction(block, topBlock.row, topBlock.col);
+                this.tempCombiningActionArr.push(movingAction);
+                this.tempCombiningBlockArr.push(topBlock);
+            }
+            if (leftBlock != null && this.tempCombiningBlockArr.indexOf(leftBlock) == -1) {//左
+                let movingAction = this.generateAction(leftBlock, row, col);
+                this.tempCombiningActionArr.push(movingAction);
+                this.tempCombiningBlockArr.push(leftBlock);
+                this.tempCombiningBlockArr.push(block);
+                //递归
+                this.findCombineBlock(leftBlock);
+            }
+            if (rightBlock != null && this.tempCombiningBlockArr.indexOf(rightBlock) == -1) {//左
+                let movingAction = this.generateAction(rightBlock, row, col);
+                this.tempCombiningActionArr.push(movingAction);
+                this.tempCombiningBlockArr.push(rightBlock);
+                this.tempCombiningBlockArr.push(block);
+                //递归
+                this.findCombineBlock(rightBlock);
+            }
+        }
+    },
+
+    findTop: function (block) {
+        let row = block.row;
+        let col = block.col;
+        if (row > 0 && this.blockArr[row - 1][col] != null) {//上
+            if (this.blockArr[row - 1][col].point == block.point) {
+                console.log('上');
+                return this.blockArr[row - 1][col];
+            }
+        }
+        return null;
+    },
+
+    findLeft: function (block) {
+        let row = block.row;
+        let col = block.col;
+        if (col > 0 && this.blockArr[row][col - 1] != null) {//左
+            if (this.blockArr[row][col - 1].point == block.point) {
+                console.log('左');
+                return this.blockArr[row][col - 1];
+            }
+        }
+        return null;
+    },
+
+    findRight: function (block) {
+        let row = block.row;
+        let col = block.col;
+        if (col < this.colCount - 1 && this.blockArr[row][col + 1] != null) {//右
+            if (this.blockArr[row][col + 1].point == block.point) {
+                console.log('右');
+                return this.blockArr[row][col + 1];
+            }
+        }
+        return null;
+    },
+
     /**
      * gamePanel中的position转换为列数
      */
@@ -241,7 +281,7 @@ cc.Class({
         let positionInPlayAreaX = position.x - this.paddingLeft;
         positionInPlayAreaX = Math.max(0, positionInPlayAreaX);
         positionInPlayAreaX = Math.min(this.gamePanel.width - this.paddingLeft - this.paddingRight, positionInPlayAreaX);
-        let col = Math.ceil(positionInPlayAreaX / this.blockSize.x) - 1;
+        let col = Math.ceil(positionInPlayAreaX / (this.blockSize.x + this.spacing.x)) - 1;
         col = Math.max(0, col);
         return col;
     },
@@ -250,8 +290,8 @@ cc.Class({
      * 行列数转换为gamePanel中的position
      */
     convertIndexToPosition: function (row, col) {
-        let x = this.paddingLeft + this.blockSize.x / 2 + col * this.blockSize.x;
-        let y = -this.blockSize.y / 2 - row * this.blockSize.y;
+        let x = this.paddingLeft + this.spacing.x / 2 + this.blockSize.x / 2 + col * (this.blockSize.x + this.spacing.x);
+        let y = -this.paddingTop - this.blockSize.y / 2 - row * (this.blockSize.y + this.spacing.y);
         return new cc.Vec2(x, y);
     },
 
@@ -266,6 +306,7 @@ cc.Class({
 
         let block = blockNode.getComponent("Block");
         block.setPoint(point);
+        block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(point)]);
         this.newBlock = block;
     },
 
@@ -273,6 +314,15 @@ cc.Class({
         let exponent = Utils.randomNum(3);
         return Math.pow(2, exponent);
     },
+
+    calculateIndex: function (point) {
+        let index = 0;
+        while (point > 2) {
+            point /= 2;
+            index++;
+        }
+        return index;
+    }
 
     // update (dt) {},
 });

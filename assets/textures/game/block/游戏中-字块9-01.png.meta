@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.0",
+  "uuid": "3c345c67-6f15-4354-94b2-8bf2757a4198",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "游戏中-字块9-01": {
+      "ver": "1.0.4",
+      "uuid": "08a6a216-8975-4e6b-8253-80bf33421406",
+      "rawTextureUuid": "3c345c67-6f15-4354-94b2-8bf2757a4198",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 160,
+      "height": 140,
+      "rawWidth": 160,
+      "rawHeight": 140,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.0",
+  "uuid": "cf1624f7-69fb-4bd8-b700-5e9fcd8e5754",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "游戏中-分数牌-01": {
+      "ver": "1.0.4",
+      "uuid": "74b02f7b-ee11-47ae-9fb3-050d9ee01035",
+      "rawTextureUuid": "cf1624f7-69fb-4bd8-b700-5e9fcd8e5754",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 528,
+      "height": 148,
+      "rawWidth": 528,
+      "rawHeight": 148,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

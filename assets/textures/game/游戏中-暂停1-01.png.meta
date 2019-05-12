@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.0",
+  "uuid": "954bb96d-af12-41e8-a894-b8cf8c228033",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "游戏中-暂停1-01": {
+      "ver": "1.0.4",
+      "uuid": "0bbe34c1-63a6-4876-813b-a3c2987b877b",
+      "rawTextureUuid": "954bb96d-af12-41e8-a894-b8cf8c228033",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 144,
+      "height": 110,
+      "rawWidth": 144,
+      "rawHeight": 110,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
