@@ -1,0 +1,15 @@
+info face="Arial" size=64 bold=0 italic=0 charset="" unicode=1 stretchH=100 smooth=1 aa=1 padding=0,0,0,0 spacing=1,1 outline=0
+common lineHeight=63 base=51 scaleW=220 scaleH=110 pages=1 packed=0 alphaChnl=0 redChnl=4 greenChnl=4 blueChnl=4
+page id=0 file="normal_font_0.png"
+chars count=11
+char id=32   x=199   y=51    width=3     height=1     xoffset=-1    yoffset=62    xadvance=15    page=0  chnl=15
+char id=48   x=90    y=0     width=42    height=50    xoffset=0     yoffset=0     xadvance=42    page=0  chnl=15
+char id=49   x=168   y=51    width=30    height=50    xoffset=0     yoffset=0     xadvance=30    page=0  chnl=15
+char id=50   x=133   y=0     width=42    height=50    xoffset=0     yoffset=0     xadvance=42    page=0  chnl=15
+char id=51   x=176   y=0     width=42    height=50    xoffset=0     yoffset=0     xadvance=42    page=0  chnl=15
+char id=52   x=0     y=0     width=44    height=50    xoffset=0     yoffset=0     xadvance=44    page=0  chnl=15
+char id=53   x=45    y=0     width=44    height=50    xoffset=0     yoffset=0     xadvance=44    page=0  chnl=15
+char id=54   x=0     y=51    width=42    height=50    xoffset=0     yoffset=0     xadvance=42    page=0  chnl=15
+char id=55   x=86    y=51    width=40    height=50    xoffset=0     yoffset=0     xadvance=40    page=0  chnl=15
+char id=56   x=127   y=51    width=40    height=50    xoffset=0     yoffset=0     xadvance=40    page=0  chnl=15
+char id=57   x=43    y=51    width=42    height=50    xoffset=0     yoffset=0     xadvance=42    page=0  chnl=15

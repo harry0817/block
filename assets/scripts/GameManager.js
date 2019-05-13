@@ -1,6 +1,12 @@
 var Utils = require('Utils');
 var BlockState = require('BlockState');
 
+var STATE = cc.Enum({
+    NORMAL: 0,
+    SETTLING: 1,
+    COMBINING: 2,
+});
+
 cc.Class({
     extends: cc.Component,
 

@@ -111,7 +111,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 160,
-      "height": 50.4
+      "height": 140
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -159,9 +159,11 @@
     "_N$string": "2",
     "_fontSize": 40,
     "_lineHeight": 40,
-    "_enableWrapText": true,
-    "_N$file": null,
-    "_isSystemFontUsed": true,
+    "_enableWrapText": false,
+    "_N$file": {
+      "__uuid__": "c813b49e-b61d-4180-94c4-1b73a2f9b0ba"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_batchAsBitmap": false,
     "_N$horizontalAlign": 1,
@@ -181,7 +183,7 @@
     "_enabled": true,
     "alignMode": 1,
     "_target": null,
-    "_alignFlags": 40,
+    "_alignFlags": 45,
     "_left": 0,
     "_right": 0,
     "_top": 0,
@@ -195,7 +197,7 @@
     "_isAbsHorizontalCenter": true,
     "_isAbsVerticalCenter": true,
     "_originalWidth": 97.87,
-    "_originalHeight": 0,
+    "_originalHeight": 60,
     "_id": ""
   },
   {
