@@ -1,16 +1,12 @@
 var Utils = require('Utils');
+var GameUI = require('GameUI');
 var BlockState = require('BlockState');
-
-var STATE = cc.Enum({
-    NORMAL: 0,
-    SETTLING: 1,
-    COMBINING: 2,
-});
 
 cc.Class({
     extends: cc.Component,
 
     properties: {
+        gameUI: GameUI,
         colCount: 5,
         rowCount: 7,
         paddingLeft: 0,
@@ -18,122 +14,141 @@ cc.Class({
         paddingTop: 0,
         paddingBottom: 0,
         spacing: new cc.Vec2(),
-        blockSize: new cc.Vec2(),
         blockSizeRatio: new cc.Vec2(),
-        moveDuration: 1,
-        gamePanel: cc.Node,
+        normalMoveDuration: 0.2,
+        emissionDuration: 0.05,
+        blockPanel: cc.Node,
         blockPrefab: cc.Prefab,
         blockSpriteFrame: [cc.SpriteFrame]
     },
 
     onLoad() {
+        this.initData();
         this.initListener();
+        this.initView();
+        this.generateBlock();
+    },
+
+    initData: function () {
+        this.score = 0;
+        this.comboCount = 0;
         this.blockArr = new Array();
+
         this.tempSettlingBlockArr = new Array();
-        this.tempSettlingActionArr = new Array();
-        this.tempCombiningBlockArr = new Array();
-        this.tempCombiningActionArr = new Array();
+        this.tempUpgradeBlockArr = new Array();
+        //key:Block value:Action
+        this.tempUpgradeBlockMap = new Map();
+        this.tempRemovedBlockArr = new Array();
+        this.tempActionArr = new Array();
         for (let i = 0; i < this.rowCount + 1; i++) {
             this.blockArr[i] = new Array();
             for (let j = 0; j < this.colCount; j++) {
-                this.blockArr[i][j] = null;
+                this.blockArr[i][j] = undefined;
             }
         }
-        this.blockSize.x = (this.gamePanel.width - this.paddingLeft - this.paddingRight) / this.colCount - this.spacing.x;
-        this.blockSize.y = this.blockSize.x * this.blockSizeRatio.y / this.blockSizeRatio.x;
-        this.gamePanel.height = this.paddingTop + this.paddingBottom + (this.rowCount + 1) * this.blockSize.y + this.rowCount * this.spacing.y;
-        console.log('block:' + this.blockSize);
-        console.log('gamePanel:(' + this.gamePanel.width + ',' + this.gamePanel.height + ')');
+    },
 
-        this.generateBlock();
+    initListener: function () {
+        this.blockPanel.on(cc.Node.EventType.TOUCH_START, this.onblockPanelTouchEvent, this);
+        this.blockPanel.on(cc.Node.EventType.TOUCH_MOVE, this.onblockPanelTouchEvent, this);
+        this.blockPanel.on(cc.Node.EventType.TOUCH_END, this.onblockPanelTouchEvent, this);
+        this.blockPanel.on(cc.Node.EventType.TOUCH_CANCEL, this.onblockPanelTouchEvent, this);
+    },
+
+    initView: function () {
+        this.gameUI.updateScore(this.score);
+        this.blockSize = new cc.Vec2();
+        this.blockSize.x = (this.blockPanel.width - this.paddingLeft - this.paddingRight) / this.colCount - this.spacing.x;
+        this.blockSize.y = this.blockSize.x * this.blockSizeRatio.y / this.blockSizeRatio.x;
+        this.blockPanel.height = this.paddingTop + this.paddingBottom + (this.rowCount + 1) * this.blockSize.y + this.rowCount * this.spacing.y;
+        console.log('block:' + this.blockSize);
+        console.log('blockPanel:(' + this.blockPanel.width + ',' + this.blockPanel.height + ')');
     },
 
     start() {
 
     },
 
-    initListener: function () {
-        this.gamePanel.on(cc.Node.EventType.TOUCH_START, this.onGamePanelTouchEvent, this);
-        this.gamePanel.on(cc.Node.EventType.TOUCH_MOVE, this.onGamePanelTouchEvent, this);
-        this.gamePanel.on(cc.Node.EventType.TOUCH_END, this.onGamePanelTouchEvent, this);
-        this.gamePanel.on(cc.Node.EventType.TOUCH_CANCEL, this.onGamePanelTouchEvent, this);
-    },
-
-    onGamePanelTouchEvent: function (event) {
+    onblockPanelTouchEvent: function (event) {
         // console.log('getLocation:' + event.getLocation());
         // console.log('getLocationInView:' + event.getLocationInView());
-        // console.log('convertToNodeSpace:' + this.gamePanel.convertToNodeSpace(event.getLocation()));
-        // console.log('convertToNodeSpaceAR:' + this.gamePanel.convertToNodeSpaceAR(event.getLocation()));
+        // console.log('convertToNodeSpace:' + this.blockPanel.convertToNodeSpace(event.getLocation()));
+        // console.log('convertToNodeSpaceAR:' + this.blockPanel.convertToNodeSpaceAR(event.getLocation()));
 
         switch (event.type) {
             case cc.Node.EventType.TOUCH_START:
             case cc.Node.EventType.TOUCH_MOVE:
-                if (this.newBlock != null) {
-                    let col = this.convertPositionToCol(this.gamePanel.convertToNodeSpaceAR(event.getLocation()));
-                    let position = this.convertIndexToPosition(this.rowCount, col);
-                    this.newBlock.node.setPosition(position.x, position.y);
+                if (this.newBlock != undefined) {
+                    let col = this.convertPositionToCol(this.blockPanel.convertToNodeSpaceAR(event.getLocation()));
+                    if (col != this.newBlock.col) {
+                        let position = this.convertIndexToPosition(this.rowCount, col);
+                        this.newBlock.node.setPosition(position.x, position.y);
+                    }
                 }
 
                 break;
             case cc.Node.EventType.TOUCH_END:
             case cc.Node.EventType.TOUCH_CANCEL:
-                if (this.newBlock != null) {
+                if (this.newBlock != undefined) {
                     console.log("cancel");
                     let col = this.convertPositionToCol(this.newBlock.node.getPosition());
                     let lastBlockThisCol = this.blockArr[this.rowCount - 1][col];
-                    if (lastBlockThisCol != null && lastBlockThisCol.point != (this.newBlock.point)) {
+                    if (lastBlockThisCol != undefined && lastBlockThisCol.point != (this.newBlock.point)) {
                         //游戏失败
                         console.log('游戏失败');
                     } else {
-                        this.blockArr[this.blockArr.length - 1][col] = this.newBlock;
-                        this.newBlock.row = this.blockArr.length - 1;
+                        this.blockArr[this.newBlock.row][col] = this.newBlock;
                         this.newBlock.col = col;
-                        this.settleBlock();
+
+                        this.settleBlock(true);
+                        this.comboCount = 0;
                     }
-                    this.newBlock = null;
+                    this.newBlock = undefined;
                 }
                 break;
         }
     },
 
-    settleBlock: function () {
+    settleBlock: function (emission = false) {
         console.log('settleBlock');
+        this.tempActionArr.splice(0, this.tempActionArr.length);
         this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
-        this.tempSettlingActionArr.splice(0, this.tempSettlingActionArr.length);
         for (let col = 0; col < this.blockArr[0].length; col++) {
             let emptyRow = -1;
             for (let row = 0; row < this.blockArr.length; row++) {
                 let block = this.blockArr[row][col];
                 if (emptyRow == -1) {
-                    if (block == null) {
+                    if (block == undefined) {
                         emptyRow = row;
                     }
                 } else {
-                    if (block != null) {
-                        this.tempSettlingBlockArr.push(block);
+                    if (block != undefined) {
                         let movingAction = this.generateAction(block, emptyRow, col);
-                        this.tempSettlingActionArr.push(movingAction);
-                        break;
+                        this.tempActionArr.push(movingAction);
+                        this.tempSettlingBlockArr.push(block);
+                        emptyRow = row;
                     }
                 }
             }
         }
 
-        if (this.tempSettlingActionArr.length > 0) {
-            for (let i = 0; i < this.tempSettlingActionArr.length; i++) {
-                let movingAction = this.tempSettlingActionArr[i];
+        if (this.tempActionArr.length > 0) {
+            let duration;
+            for (let i = 0; i < this.tempActionArr.length; i++) {
+                let movingAction = this.tempActionArr[i];
                 let block = movingAction.block;
-                this.blockArr[block.row][block.col] = null;
+                duration = emission ? (block.row - movingAction.toRow) * this.emissionDuration : this.normalMoveDuration;
+                this.blockArr[block.row][block.col] = undefined;
                 this.blockArr[movingAction.toRow][movingAction.toCol] = block;
                 block.row = movingAction.toRow;
                 block.col = movingAction.toCol;
                 let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
-                let action = cc.moveTo(this.moveDuration, position);
+                let action = cc.moveTo(duration, position);
                 block.node.runAction(action);
             }
             this.scheduleOnce(function () {
                 this.combineBlock();
-            }, this.moveDuration);
+            }, duration);
         } else {
             this.combineBlock();
         }
@@ -141,71 +156,77 @@ cc.Class({
 
     combineBlock: function () {
         console.log('combineBlock');
-        let tempMovingBlockArr = this.tempSettlingBlockArr.concat(this.tempCombiningBlockArr);
-        let tempCombiningBlockMap = new Map();
+        this.comboCount++;
+        let tempMovingBlockArr = this.tempSettlingBlockArr.concat(this.tempUpgradeBlockArr);
+        this.tempActionArr.splice(0, this.tempActionArr.length);
+        this.tempUpgradeBlockMap.clear();
         this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
-        this.tempCombiningBlockArr.splice(0, this.tempCombiningBlockArr.length);
+        this.tempUpgradeBlockArr.splice(0, this.tempUpgradeBlockArr.length);
+        this.tempRemovedBlockArr.splice(0, this.tempRemovedBlockArr.length);
+
         for (let i = 0; i < tempMovingBlockArr.length; i++) {
-            console.log('tempMovingBlock:' + tempMovingBlockArr[i].col + ',' + tempMovingBlockArr[i].row);
             this.findCombineBlock(tempMovingBlockArr[i]);
         }
 
-        if (this.tempCombiningActionArr.length > 0) {
+        if (this.tempActionArr.length > 0) {
             //生成加分action
-            for (let i = 0; i < this.tempCombiningActionArr.length; i++) {
-                let action = this.tempCombiningActionArr[i];
+            for (let i = 0; i < this.tempActionArr.length; i++) {
+                let action = this.tempActionArr[i];
                 let targetBlock = this.blockArr[action.toRow][action.toCol];
-                if (tempCombiningBlockMap.has(targetBlock)) {
-                    let action = tempCombiningBlockMap.get(targetBlock);
-                    action.point = 2 * action.point;
+                if (this.tempUpgradeBlockMap.has(targetBlock)) {
+                    let action = this.tempUpgradeBlockMap.get(targetBlock);
+                    action.combineCount++;
                 } else {
-                    let action = this.generateAction(targetBlock, targetBlock.row, targetBlock.col, true, targetBlock.point * 2);
-                    tempCombiningBlockMap.set(targetBlock, action);
+                    let action = this.generateAction(targetBlock, targetBlock.row, targetBlock.col, true);
+                    this.tempUpgradeBlockMap.set(targetBlock, action);
                 }
             }
             let self = this;
-            tempCombiningBlockMap.forEach(function (value, key) {
-                self.tempCombiningActionArr.push(value);
-            }, tempCombiningBlockMap);
+            this.tempUpgradeBlockMap.forEach(function (value, key) {
+                self.tempActionArr.push(value);
+            }, this.tempUpgradeBlockMap);
 
-            for (let i = 0; i < this.tempCombiningActionArr.length; i++) {
-                let movingAction = this.tempCombiningActionArr[i];
+            for (let i = 0; i < this.tempActionArr.length; i++) {
+                let movingAction = this.tempActionArr[i];
                 let block = movingAction.block;
                 if (movingAction.upgrade) {//加分
                     this.scheduleOnce(function () {
-                        block.setPoint(movingAction.point);
-                        block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(movingAction.point)]);
-                    }, this.moveDuration);
+                        let point = block.point * Math.pow(2, movingAction.combineCount - 1);
+                        block.setPoint(point);
+                        block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(point)]);
+                        this.score += (this.comboCount > 1 ? point * 4 : point * 2);
+                        this.gameUI.updateScore(this.score);
+                    }, this.normalMoveDuration);
                 } else {//移动
                     let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
-                    let action = cc.moveTo(this.moveDuration, position);
+                    let action = cc.moveTo(this.normalMoveDuration, position);
                     block.node.runAction(action);
                     this.scheduleOnce(function () {
                         block.node.destroy();
-                        this.blockArr[block.row][block.col] = null;
-                    }, this.moveDuration);
+                        this.blockArr[block.row][block.col] = undefined;
+                    }, this.normalMoveDuration);
                 }
             }
             this.scheduleOnce(function () {
                 this.settleBlock();
-            }, this.moveDuration);
+            }, this.normalMoveDuration);
         } else {
             this.generateBlock();
         }
     },
 
-    generateAction: function (block, row, col, upgrade = false, point = 0) {
+    generateAction: function (block, toRow, toCol, upgrade = false) {
         let movingAction = new Object();
         movingAction.block = block;
-        movingAction.toRow = row;
-        movingAction.toCol = col;
+        movingAction.toRow = toRow;
+        movingAction.toCol = toCol;
         movingAction.upgrade = upgrade;
-        movingAction.point = point;
+        movingAction.combineCount = upgrade ? 2 : 0;
         return movingAction;
     },
 
     findCombineBlock: function (block) {
-        if (block == null || this.tempCombiningBlockArr.indexOf(block) != -1) {
+        if (this.tempUpgradeBlockArr.indexOf(block) != -1 || this.tempRemovedBlockArr.indexOf(block) != -1) {
             return;
         }
         console.log('findCombineBlock:' + block.col + ',' + block.row);
@@ -215,29 +236,41 @@ cc.Class({
         let topBlock = this.findTop(block);
         let leftBlock = this.findLeft(block);
         let rightBlock = this.findRight(block);
-        if (topBlock != null && leftBlock == null && rightBlock == null) {//只有上方有
+        if (topBlock != undefined && leftBlock == undefined && rightBlock == undefined) {//只有上方有
+            console.log('只有上');
             let movingAction = this.generateAction(block, topBlock.row, topBlock.col);
-            this.tempCombiningActionArr.push(movingAction);
-            this.tempCombiningBlockArr.push(topBlock);
+            this.tempActionArr.push(movingAction);
+            this.tempUpgradeBlockArr.push(topBlock);
+            this.tempRemovedBlockArr.push(block);
         } else {
-            if (topBlock != null) {//上
-                let movingAction = this.generateAction(block, topBlock.row, topBlock.col);
-                this.tempCombiningActionArr.push(movingAction);
-                this.tempCombiningBlockArr.push(topBlock);
+            if (topBlock != undefined) {//上
+                console.log('上');
+                let movingAction = this.generateAction(topBlock, row, col);
+                this.tempActionArr.push(movingAction);
+                if (this.tempUpgradeBlockArr.indexOf(block) == -1) {
+                    this.tempUpgradeBlockArr.push(block);
+                }
+                this.tempRemovedBlockArr.push(topBlock);
             }
-            if (leftBlock != null && this.tempCombiningBlockArr.indexOf(leftBlock) == -1) {//左
+            if (leftBlock != undefined && this.tempUpgradeBlockArr.indexOf(leftBlock) == -1) {//左
+                console.log('左');
                 let movingAction = this.generateAction(leftBlock, row, col);
-                this.tempCombiningActionArr.push(movingAction);
-                this.tempCombiningBlockArr.push(leftBlock);
-                this.tempCombiningBlockArr.push(block);
+                this.tempActionArr.push(movingAction);
+                if (this.tempUpgradeBlockArr.indexOf(block) == -1) {
+                    this.tempUpgradeBlockArr.push(block);
+                }
+                this.tempRemovedBlockArr.push(leftBlock);
                 //递归
                 this.findCombineBlock(leftBlock);
             }
-            if (rightBlock != null && this.tempCombiningBlockArr.indexOf(rightBlock) == -1) {//左
+            if (rightBlock != undefined && this.tempUpgradeBlockArr.indexOf(rightBlock) == -1) {//右
+                console.log('右');
                 let movingAction = this.generateAction(rightBlock, row, col);
-                this.tempCombiningActionArr.push(movingAction);
-                this.tempCombiningBlockArr.push(rightBlock);
-                this.tempCombiningBlockArr.push(block);
+                this.tempActionArr.push(movingAction);
+                if (this.tempUpgradeBlockArr.indexOf(block) == -1) {
+                    this.tempUpgradeBlockArr.push(block);
+                }
+                this.tempRemovedBlockArr.push(rightBlock);
                 //递归
                 this.findCombineBlock(rightBlock);
             }
@@ -247,53 +280,50 @@ cc.Class({
     findTop: function (block) {
         let row = block.row;
         let col = block.col;
-        if (row > 0 && this.blockArr[row - 1][col] != null) {//上
+        if (row > 0 && this.blockArr[row - 1][col] != undefined) {
             if (this.blockArr[row - 1][col].point == block.point) {
-                console.log('上');
                 return this.blockArr[row - 1][col];
             }
         }
-        return null;
+        return undefined;
     },
 
     findLeft: function (block) {
         let row = block.row;
         let col = block.col;
-        if (col > 0 && this.blockArr[row][col - 1] != null) {//左
+        if (col > 0 && this.blockArr[row][col - 1] != undefined) {
             if (this.blockArr[row][col - 1].point == block.point) {
-                console.log('左');
                 return this.blockArr[row][col - 1];
             }
         }
-        return null;
+        return undefined;
     },
 
     findRight: function (block) {
         let row = block.row;
         let col = block.col;
-        if (col < this.colCount - 1 && this.blockArr[row][col + 1] != null) {//右
+        if (col < this.colCount - 1 && this.blockArr[row][col + 1] != undefined) {
             if (this.blockArr[row][col + 1].point == block.point) {
-                console.log('右');
                 return this.blockArr[row][col + 1];
             }
         }
-        return null;
+        return undefined;
     },
 
     /**
-     * gamePanel中的position转换为列数
+     * blockPanel中的position转换为列数
      */
     convertPositionToCol: function (position) {
         let positionInPlayAreaX = position.x - this.paddingLeft;
         positionInPlayAreaX = Math.max(0, positionInPlayAreaX);
-        positionInPlayAreaX = Math.min(this.gamePanel.width - this.paddingLeft - this.paddingRight, positionInPlayAreaX);
+        positionInPlayAreaX = Math.min(this.blockPanel.width - this.paddingLeft - this.paddingRight, positionInPlayAreaX);
         let col = Math.ceil(positionInPlayAreaX / (this.blockSize.x + this.spacing.x)) - 1;
         col = Math.max(0, col);
         return col;
     },
 
     /**
-     * 行列数转换为gamePanel中的position
+     * 行列数转换为blockPanel中的position
      */
     convertIndexToPosition: function (row, col) {
         let x = this.paddingLeft + this.spacing.x / 2 + this.blockSize.x / 2 + col * (this.blockSize.x + this.spacing.x);
@@ -302,17 +332,20 @@ cc.Class({
     },
 
     generateBlock: function () {
-        let point = this.randomPoint();
         let blockNode = cc.instantiate(this.blockPrefab);
         blockNode.width = this.blockSize.x;
         blockNode.height = this.blockSize.y;
-        this.gamePanel.addChild(blockNode);
-        let position = this.convertIndexToPosition(this.rowCount, Math.floor(this.colCount / 2));
-        blockNode.setPosition(position);
 
         let block = blockNode.getComponent("Block");
+        block.row = this.rowCount;
+        block.col = Math.floor(this.colCount / 2);
+        let point = this.randomPoint();
         block.setPoint(point);
         block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(point)]);
+        let position = this.convertIndexToPosition(block.row, block.col);
+        blockNode.setPosition(position);
+
+        this.blockPanel.addChild(blockNode);
         this.newBlock = block;
     },
 

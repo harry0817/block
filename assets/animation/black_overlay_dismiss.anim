@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "black_overlay_show",
+  "_name": "black_overlay_dismiss",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.3,
@@ -12,11 +12,11 @@
       "opacity": [
         {
           "frame": 0,
-          "value": 0
+          "value": 77
         },
         {
           "frame": 0.3,
-          "value": 77
+          "value": 0
         }
       ]
     }

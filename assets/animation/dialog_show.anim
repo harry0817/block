@@ -1,6 +1,6 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "black_overlay_show",
+  "_name": "dialog_show",
   "_objFlags": 0,
   "_native": "",
   "_duration": 0.3,
@@ -9,14 +9,22 @@
   "wrapMode": 1,
   "curveData": {
     "props": {
-      "opacity": [
+      "scale": [
         {
           "frame": 0,
-          "value": 0
+          "value": {
+            "__type__": "cc.Vec2",
+            "x": 0,
+            "y": 0
+          }
         },
         {
           "frame": 0.3,
-          "value": 77
+          "value": {
+            "__type__": "cc.Vec2",
+            "x": 1,
+            "y": 1
+          }
         }
       ]
     }
