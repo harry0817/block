@@ -6,10 +6,15 @@ cc.Class({
     properties: {
         pauseBtn: cc.Button,
         scoreLabel: cc.Label,
+        pauseDialogPrefab: cc.Prefab
+    },
+
+    init(game) {
+        this.game = game;
     },
 
     onLoad() {
-
+        this.pauseBtn.node.on('click', this.showPauseDialog, this);
     },
 
     start() {
@@ -20,6 +25,15 @@ cc.Class({
         this.scoreLabel.string = score;
     },
 
+    showPauseDialog: function () {
+        let dialogNode = cc.instantiate(this.pauseDialogPrefab);
+        let dialog = dialogNode.getComponent('PauseDialog');
+        dialog.show(this);
+
+        dialogNode.once('dismiss', function (event) {
+            
+        }, this);
+    }
 
     // update (dt) {},
 });

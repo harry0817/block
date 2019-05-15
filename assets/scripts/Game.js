@@ -22,14 +22,7 @@ cc.Class({
         blockSpriteFrame: [cc.SpriteFrame]
     },
 
-    onLoad() {
-        this.initData();
-        this.initListener();
-        this.initView();
-        this.generateBlock();
-    },
-
-    initData: function () {
+    ctor() {
         this.score = 0;
         this.comboCount = 0;
         this.blockArr = new Array();
@@ -46,6 +39,17 @@ cc.Class({
                 this.blockArr[i][j] = undefined;
             }
         }
+    },
+
+    onLoad() {
+        this.initData();
+        this.initListener();
+        this.initView();
+        this.generateBlock();
+    },
+
+    initData: function () {
+
     },
 
     initListener: function () {
@@ -143,12 +147,15 @@ cc.Class({
                 block.row = movingAction.toRow;
                 block.col = movingAction.toCol;
                 let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
-                let action = cc.moveTo(duration, position);
+                let action;
+                if (i == this.tempActionArr.length - 1) {
+                    let finished = cc.callFunc(this.combineBlock, this);
+                    action = cc.sequence(cc.moveTo(duration, position), finished);
+                } else {
+                    action = cc.moveTo(duration, position);
+                }
                 block.node.runAction(action);
             }
-            this.scheduleOnce(function () {
-                this.combineBlock();
-            }, duration);
         } else {
             this.combineBlock();
         }
@@ -189,27 +196,45 @@ cc.Class({
             for (let i = 0; i < this.tempActionArr.length; i++) {
                 let movingAction = this.tempActionArr[i];
                 let block = movingAction.block;
+                let action;
                 if (movingAction.upgrade) {//加分
-                    this.scheduleOnce(function () {
+                    // this.scheduleOnce(function () {
+                    //     let point = block.point * Math.pow(2, movingAction.combineCount - 1);
+                    //     block.setPoint(point);
+                    //     block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(point)]);
+                    //     this.score += (this.comboCount > 1 ? point * 4 : point * 2);
+                    //     this.gameUI.updateScore(this.score);
+                    // }, this.normalMoveDuration);
+
+                    let finished = cc.callFunc(function () {
                         let point = block.point * Math.pow(2, movingAction.combineCount - 1);
                         block.setPoint(point);
                         block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(point)]);
                         this.score += (this.comboCount > 1 ? point * 4 : point * 2);
                         this.gameUI.updateScore(this.score);
-                    }, this.normalMoveDuration);
+                    }, this);
+                    action = cc.sequence(cc.delayTime(this.normalMoveDuration), finished);
                 } else {//移动
                     let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
-                    let action = cc.moveTo(this.normalMoveDuration, position);
-                    block.node.runAction(action);
-                    this.scheduleOnce(function () {
+                    let finished = cc.callFunc(function () {
+                        console.log('destroy:' + block.row + ',' + block.col);
+
                         block.node.destroy();
                         this.blockArr[block.row][block.col] = undefined;
-                    }, this.normalMoveDuration);
+                    }, this);
+                    action = cc.sequence(cc.moveTo(this.normalMoveDuration, position), finished);
                 }
+                let newAction;
+                if (i == this.tempActionArr.length - 1) {
+                    newAction = cc.sequence(action, cc.callFunc(this.settleBlock, this));
+                }else{
+                    newAction = action;
+                }
+                block.node.runAction(newAction);
             }
-            this.scheduleOnce(function () {
-                this.settleBlock();
-            }, this.normalMoveDuration);
+            // this.scheduleOnce(function () {
+            //     this.settleBlock();
+            // }, this.normalMoveDuration);
         } else {
             this.generateBlock();
         }
