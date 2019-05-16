@@ -17,7 +17,7 @@ var BaseDialog = cc.Class({
     },
 
     home: function () {
-
+        
     },
 
     continue: function () {

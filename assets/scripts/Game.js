@@ -46,6 +46,19 @@ cc.Class({
         this.initListener();
         this.initView();
         this.generateBlock();
+
+        let action = cc.sequence(
+            cc.moveBy(1,100,100),
+            cc.callFunc(function () {
+                console.log('1');
+                
+            }, this)
+        );
+        let newAction = cc.sequence(action, cc.callFunc(function(){
+            console.log('2');
+            
+        }, this));
+        this.blockPanel.runAction(newAction);
     },
 
     initData: function () {
@@ -215,10 +228,10 @@ cc.Class({
                     }, this);
                     action = cc.sequence(cc.delayTime(this.normalMoveDuration), finished);
                 } else {//移动
+                    console.log('move');
                     let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
                     let finished = cc.callFunc(function () {
                         console.log('destroy:' + block.row + ',' + block.col);
-
                         block.node.destroy();
                         this.blockArr[block.row][block.col] = undefined;
                     }, this);
@@ -227,7 +240,7 @@ cc.Class({
                 let newAction;
                 if (i == this.tempActionArr.length - 1) {
                     newAction = cc.sequence(action, cc.callFunc(this.settleBlock, this));
-                }else{
+                } else {
                     newAction = action;
                 }
                 block.node.runAction(newAction);
