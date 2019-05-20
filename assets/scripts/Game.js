@@ -1,6 +1,5 @@
 var Utils = require('Utils');
 var GameUI = require('GameUI');
-var BlockState = require('BlockState');
 
 cc.Class({
     extends: cc.Component,
@@ -30,7 +29,6 @@ cc.Class({
         this.tempSettlingBlockArr = new Array();
         this.tempUpgradeBlockArr = new Array();
         //key:Block value:Action
-        this.tempUpgradeBlockMap = new Map();
         this.tempRemovedBlockArr = new Array();
         this.tempActionArr = new Array();
         for (let i = 0; i < this.rowCount + 1; i++) {
@@ -39,6 +37,7 @@ cc.Class({
                 this.blockArr[i][j] = undefined;
             }
         }
+        this.userCanOperate = true;
     },
 
     onLoad() {
@@ -46,20 +45,8 @@ cc.Class({
         this.initData();
         this.initListener();
         this.initView();
+
         this.generateBlock();
-
-        let action = cc.sequence(
-            cc.moveBy(0.2, 100, 100),
-            cc.callFunc(function () {
-                console.log('1');
-
-            }, this)
-        );
-        let newAction = cc.sequence(action, cc.callFunc(function () {
-            console.log('2');
-
-        }, this));
-        // this.blockPanel.runAction(newAction);
     },
 
     start() {
@@ -84,24 +71,38 @@ cc.Class({
         this.blockSize.y = this.blockSize.x * this.blockSizeRatio.y / this.blockSizeRatio.x;
         this.blockPanel.height = this.paddingTop + this.paddingBottom + (this.rowCount + 1) * this.blockSize.y + this.rowCount * this.spacing.y;
         console.log('block:' + this.blockSize);
-        console.log('blockPanel:(' + this.blockPanel.width + ',' + this.blockPanel.height + ')');
+        console.log('blockPanel:' + this.blockPanel.width + ',' + this.blockPanel.height);
     },
 
     gotoHome: function () {
+
+        let intArr = Utils.toIntegerArr(this.blockArr);
+        let gameData = {
+            blockArr: intArr,
+            score: this.score
+        };
+        console.log(JSON.stringify(gameData));
+
+        cc.sys.localStorage.setItem('gameData', JSON.stringify(gameData));
         cc.director.loadScene('Home');
     },
 
-    restartGame: function () {
-        console.log('restartGame');
+    newGame: function () {
+        console.log('newGame');
         for (let row = 0; row < this.blockArr.length; row++) {
             for (let col = 0; col < this.blockArr[row].length; col++) {
                 let block = this.blockArr[row][col];
-                if (block != null) {
+                if (block != undefined) {
                     block.node.destroy();
-                    console.log(this.blockArr[row][col]);
+                    this.blockArr[row][col] = undefined;
                 }
             }
         }
+        if (this.newBlock != null) {
+            this.newBlock.node.destroy();
+            this.newBlock = undefined;
+        }
+        this.userCanOperate = true;
         this.generateBlock();
     },
 
@@ -111,6 +112,9 @@ cc.Class({
         // console.log('convertToNodeSpace:' + this.blockPanel.convertToNodeSpace(event.getLocation()));
         // console.log('convertToNodeSpaceAR:' + this.blockPanel.convertToNodeSpaceAR(event.getLocation()));
 
+        if (!this.userCanOperate) {
+            return;
+        }
         switch (event.type) {
             case cc.Node.EventType.TOUCH_START:
             case cc.Node.EventType.TOUCH_MOVE:
@@ -126,27 +130,28 @@ cc.Class({
             case cc.Node.EventType.TOUCH_END:
             case cc.Node.EventType.TOUCH_CANCEL:
                 if (this.newBlock != undefined) {
-                    console.log("cancel");
+                    console.log('手指up');
+                    this.userCanOperate = false;
                     let col = this.convertPositionToCol(this.newBlock.node.getPosition());
                     let lastBlockThisCol = this.blockArr[this.rowCount - 1][col];
                     if (lastBlockThisCol != undefined && lastBlockThisCol.point != (this.newBlock.point)) {
                         //游戏失败
-                        console.log('游戏失败');
+                        this.gameUI.showFailedDialog();
                     } else {
+                        this.comboCount = 0;
                         this.blockArr[this.newBlock.row][col] = this.newBlock;
                         this.newBlock.col = col;
 
+                        this.randomBombItem();
                         this.settleBlock(true);
-                        this.comboCount = 0;
                     }
-                    this.newBlock = undefined;
                 }
                 break;
         }
     },
 
     settleBlock: function (emission = false) {
-        console.log('settleBlock');
+        // console.log('settleBlock');
         this.tempActionArr.splice(0, this.tempActionArr.length);
         this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
         for (let col = 0; col < this.blockArr[0].length; col++) {
@@ -162,7 +167,7 @@ cc.Class({
                         let movingAction = this.generateAction(block, emptyRow, col);
                         this.tempActionArr.push(movingAction);
                         this.tempSettlingBlockArr.push(block);
-                        emptyRow = row;
+                        emptyRow++;
                     }
                 }
             }
@@ -189,16 +194,14 @@ cc.Class({
                 block.node.runAction(action);
             }
         } else {
-            this.combineBlock();
+            this.scheduleOnce(this.combineBlock, 0.2);
         }
     },
 
     combineBlock: function () {
         console.log('combineBlock');
-        this.comboCount++;
         let tempMovingBlockArr = this.tempSettlingBlockArr.concat(this.tempUpgradeBlockArr);
         this.tempActionArr.splice(0, this.tempActionArr.length);
-        this.tempUpgradeBlockMap.clear();
         this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
         this.tempUpgradeBlockArr.splice(0, this.tempUpgradeBlockArr.length);
         this.tempRemovedBlockArr.splice(0, this.tempRemovedBlockArr.length);
@@ -208,128 +211,123 @@ cc.Class({
         }
 
         if (this.tempActionArr.length > 0) {
-            //生成加分action
-            for (let i = 0; i < this.tempActionArr.length; i++) {
-                let action = this.tempActionArr[i];
-                let targetBlock = this.blockArr[action.toRow][action.toCol];
-                if (this.tempUpgradeBlockMap.has(targetBlock)) {
-                    let action = this.tempUpgradeBlockMap.get(targetBlock);
-                    action.combineCount++;
-                } else {
-                    let action = this.generateAction(targetBlock, targetBlock.row, targetBlock.col, true);
-                    this.tempUpgradeBlockMap.set(targetBlock, action);
-                }
-            }
-            let self = this;
-            this.tempUpgradeBlockMap.forEach(function (value, key) {
-                self.tempActionArr.push(value);
-            }, this.tempUpgradeBlockMap);
-
+            this.comboCount++;
+            //移动
             for (let i = 0; i < this.tempActionArr.length; i++) {
                 let movingAction = this.tempActionArr[i];
                 let block = movingAction.block;
-                let action;
-                if (movingAction.upgrade) {//加分
-                    // this.scheduleOnce(function () {
-                    //     let point = block.point * Math.pow(2, movingAction.combineCount - 1);
-                    //     block.setPoint(point);
-                    //     block.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
-                    //     this.score += (this.comboCount > 1 ? point * 4 : point * 2);
-                    //     this.gameUI.updateScore(this.score);
-                    // }, this.normalMoveDuration);
-
-                    let finished = cc.callFunc(function () {
-                        let point = block.point * Math.pow(2, movingAction.combineCount - 1);
-                        block.setPoint(point);
-                        block.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
-                        this.score += (this.comboCount > 1 ? point * 4 : point * 2);
-                        this.gameUI.updateScore(this.score);
-                    }, this);
-                    action = cc.sequence(cc.delayTime(this.normalMoveDuration), finished);
-                } else {//移动
-                    console.log('move');
-                    let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
-                    let finished = cc.callFunc(function () {
-                        console.log('destroy:' + block.row + ',' + block.col);
-                        block.node.destroy();
-                        this.blockArr[block.row][block.col] = undefined;
-                    }, this);
-                    action = cc.sequence(cc.moveTo(this.normalMoveDuration, position), finished);
-                }
-                let newAction;
-                if (i == this.tempActionArr.length - 1) {
-                    newAction = cc.sequence(action, cc.callFunc(this.settleBlock, this));
-                } else {
-                    newAction = action;
-                }
-                block.node.runAction(newAction);
+                // console.log('move:' + block.toString() + ' to (' + movingAction.toRow + ',' + movingAction.toCol + ')');
+                let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
+                let action = cc.moveTo(this.normalMoveDuration, position);
+                block.node.runAction(action);
             }
-            // this.scheduleOnce(function () {
-            //     this.settleBlock();
-            // }, this.normalMoveDuration);
+            //加分
+            let upgradeAction = cc.callFunc(function () {
+                for (let i = 0; i < this.tempUpgradeBlockArr.length; i++) {
+                    let upgradeBlock = this.tempUpgradeBlockArr[i];
+                    let point = upgradeBlock.point * Math.pow(2, upgradeBlock.combineBlockArr.length);
+                    // console.log('upgrade:' + upgradeBlock.toString() + ' to ' + point);
+                    upgradeBlock.setPoint(point);
+                    upgradeBlock.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
+                    this.score += (this.comboCount >= 2 ? point * 4 : point * 2);
+                    this.gameUI.updateScore(this.score);
+
+                    for (let j = 0; j < upgradeBlock.combineBlockArr.length; j++) {
+                        let combineBlock = upgradeBlock.combineBlockArr[j];
+                        // console.log('destroy:' + combineBlock.toString());
+                        combineBlock.node.destroy();
+                        this.blockArr[combineBlock.row][combineBlock.col] = undefined;
+                    }
+                    upgradeBlock.clearCombineBlock();
+                }
+            }, this);
+            let action = cc.sequence(cc.delayTime(this.normalMoveDuration), upgradeAction, cc.callFunc(this.settleBlock, this));
+            this.node.runAction(action);
         } else {
             this.generateBlock();
+            this.userCanOperate = true;
+            this.gameUI.showCombo(this.comboCount);
         }
     },
 
-    generateAction: function (block, toRow, toCol, upgrade = false) {
+    generateAction: function (block, toRow, toCol) {
         let movingAction = new Object();
         movingAction.block = block;
         movingAction.toRow = toRow;
         movingAction.toCol = toCol;
-        movingAction.upgrade = upgrade;
-        movingAction.combineCount = upgrade ? 2 : 0;
         return movingAction;
     },
 
+    /**
+     * 找到能和block合成的块
+     */
     findCombineBlock: function (block) {
         if (this.tempUpgradeBlockArr.indexOf(block) != -1 || this.tempRemovedBlockArr.indexOf(block) != -1) {
             return;
         }
-        console.log('findCombineBlock:' + block.col + ',' + block.row);
+        // console.log('findCombineBlock:' + block.toString());
 
         let row = block.row;
         let col = block.col;
         let topBlock = this.findTop(block);
+        let bottomBlock = this.findBottom(block);
         let leftBlock = this.findLeft(block);
         let rightBlock = this.findRight(block);
         if (topBlock != undefined && leftBlock == undefined && rightBlock == undefined) {//只有上方有
-            console.log('只有上');
+            // console.log('只有上:' + block.toString() + ' to ' + topBlock.toString());
+            topBlock.pushCombineBlock(block);
             let movingAction = this.generateAction(block, topBlock.row, topBlock.col);
             this.tempActionArr.push(movingAction);
             this.tempUpgradeBlockArr.push(topBlock);
             this.tempRemovedBlockArr.push(block);
         } else {
             if (topBlock != undefined) {//上
-                console.log('上');
+                // console.log('上:' + topBlock.toString() + ' to ' + block.toString());
+                block.pushCombineBlock(topBlock);
                 let movingAction = this.generateAction(topBlock, row, col);
                 this.tempActionArr.push(movingAction);
                 if (this.tempUpgradeBlockArr.indexOf(block) == -1) {
                     this.tempUpgradeBlockArr.push(block);
                 }
+                //递归
+                this.findCombineBlock(topBlock);
                 this.tempRemovedBlockArr.push(topBlock);
             }
-            if (leftBlock != undefined && this.tempUpgradeBlockArr.indexOf(leftBlock) == -1) {//左
-                console.log('左');
+            if (bottomBlock != undefined) {//下
+                // console.log('下:' + bottomBlock.toString() + ' to ' + block.toString());
+                block.pushCombineBlock(bottomBlock);
+                let movingAction = this.generateAction(bottomBlock, row, col);
+                this.tempActionArr.push(movingAction);
+                if (this.tempUpgradeBlockArr.indexOf(block) == -1) {
+                    this.tempUpgradeBlockArr.push(block);
+                }
+                //递归
+                this.findCombineBlock(bottomBlock);
+                this.tempRemovedBlockArr.push(bottomBlock);
+            }
+            if (leftBlock != undefined) {//左
+                // console.log('左:' + leftBlock.toString() + ' to ' + block.toString());
+                block.pushCombineBlock(leftBlock);
                 let movingAction = this.generateAction(leftBlock, row, col);
                 this.tempActionArr.push(movingAction);
                 if (this.tempUpgradeBlockArr.indexOf(block) == -1) {
                     this.tempUpgradeBlockArr.push(block);
                 }
-                this.tempRemovedBlockArr.push(leftBlock);
                 //递归
                 this.findCombineBlock(leftBlock);
+                this.tempRemovedBlockArr.push(leftBlock);
             }
-            if (rightBlock != undefined && this.tempUpgradeBlockArr.indexOf(rightBlock) == -1) {//右
-                console.log('右');
+            if (rightBlock != undefined) {//右
+                // console.log('右:' + rightBlock.toString() + ' to ' + block.toString());
+                block.pushCombineBlock(rightBlock);
                 let movingAction = this.generateAction(rightBlock, row, col);
                 this.tempActionArr.push(movingAction);
                 if (this.tempUpgradeBlockArr.indexOf(block) == -1) {
                     this.tempUpgradeBlockArr.push(block);
                 }
-                this.tempRemovedBlockArr.push(rightBlock);
                 //递归
                 this.findCombineBlock(rightBlock);
+                this.tempRemovedBlockArr.push(rightBlock);
             }
         }
     },
@@ -337,9 +335,26 @@ cc.Class({
     findTop: function (block) {
         let row = block.row;
         let col = block.col;
-        if (row > 0 && this.blockArr[row - 1][col] != undefined) {
-            if (this.blockArr[row - 1][col].point == block.point) {
-                return this.blockArr[row - 1][col];
+        if (row > 0) {
+            let targetBlock = this.blockArr[row - 1][col];
+            if (targetBlock != undefined && this.tempRemovedBlockArr.indexOf(targetBlock) == -1 && this.tempUpgradeBlockArr.indexOf(targetBlock) == -1) {
+                if (targetBlock.point == block.point) {
+                    return targetBlock;
+                }
+            }
+        }
+        return undefined;
+    },
+
+    findBottom: function (block) {
+        let row = block.row;
+        let col = block.col;
+        if (row < this.rowCount - 1) {
+            let targetBlock = this.blockArr[row + 1][col];
+            if (targetBlock != undefined && this.tempRemovedBlockArr.indexOf(targetBlock) == -1 && this.tempUpgradeBlockArr.indexOf(targetBlock) == -1) {
+                if (targetBlock.point == block.point) {
+                    return targetBlock;
+                }
             }
         }
         return undefined;
@@ -348,9 +363,12 @@ cc.Class({
     findLeft: function (block) {
         let row = block.row;
         let col = block.col;
-        if (col > 0 && this.blockArr[row][col - 1] != undefined) {
-            if (this.blockArr[row][col - 1].point == block.point) {
-                return this.blockArr[row][col - 1];
+        if (col > 0) {
+            let targetBlock = this.blockArr[row][col - 1];
+            if (targetBlock != undefined && this.tempRemovedBlockArr.indexOf(targetBlock) == -1 && this.tempUpgradeBlockArr.indexOf(targetBlock) == -1) {
+                if (targetBlock.point == block.point) {
+                    return targetBlock;
+                }
             }
         }
         return undefined;
@@ -359,9 +377,12 @@ cc.Class({
     findRight: function (block) {
         let row = block.row;
         let col = block.col;
-        if (col < this.colCount - 1 && this.blockArr[row][col + 1] != undefined) {
-            if (this.blockArr[row][col + 1].point == block.point) {
-                return this.blockArr[row][col + 1];
+        if (col < this.colCount - 1) {
+            let targetBlock = this.blockArr[row][col + 1];
+            if (targetBlock != undefined && this.tempRemovedBlockArr.indexOf(targetBlock) == -1 && this.tempUpgradeBlockArr.indexOf(targetBlock) == -1) {
+                if (targetBlock.point == block.point) {
+                    return targetBlock;
+                }
             }
         }
         return undefined;
@@ -388,23 +409,94 @@ cc.Class({
         return new cc.Vec2(x, y);
     },
 
+    /**
+     * 随机生成新的块
+     */
     generateBlock: function () {
         let blockNode = cc.instantiate(this.blockPrefab);
+        //size、position
         blockNode.width = this.blockSize.x;
         blockNode.height = this.blockSize.y;
-
         let block = blockNode.getComponent("Block");
+        block.init(this);
         block.row = this.rowCount;
         block.col = Math.floor(this.colCount / 2);
+        let position = this.convertIndexToPosition(block.row, block.col);
+        blockNode.setPosition(position);
+        //point
         let point = Utils.randomPoint();
         block.setPoint(point);
         block.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
-        let position = this.convertIndexToPosition(block.row, block.col);
-        blockNode.setPosition(position);
-
+        //
         this.blockPanel.addChild(blockNode);
         this.newBlock = block;
+        //
+        Utils.logBlockArr(this.blockArr);
     },
+
+    /**
+     * 刷新待加入的块
+     */
+    refreshNewBlock: function () {
+        if (this.userCanOperate) {
+            if (this.newBlock != undefined) {
+                var point = this.newBlock.point;
+                while (point == this.newBlock.point) {
+                    point = Utils.randomPoint();
+                }
+                this.newBlock.setPoint(point);
+                this.newBlock.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
+            }
+        }
+    },
+
+    /**
+     * 随机分配道具
+     */
+    randomBombItem: function () {
+        for (let row = 0; row < this.rowCount; row++) {
+            for (let col = 0; col < this.colCount; col++) {
+                let block = this.blockArr[row][col];
+                if (block != undefined) {
+                    block.setBomb(Utils.randomNum(10) <= 2);
+                }
+            }
+        }
+    },
+
+    /**
+     * 炸弹道具
+     */
+    onBomb: function (block) {
+        let startRow = Math.max(0, block.row - 1);
+        let endRow = Math.min(this.rowCount - 1, block.row + 1);
+        let startCol = Math.max(0, block.col - 1);
+        let endCol = Math.min(this.colCount - 1, block.col + 1);
+        for (let row = startRow; row <= endRow; row++) {
+            for (let col = startCol; col <= endCol; col++) {
+                let block = this.blockArr[row][col];
+                if (block != undefined) {
+                    block.node.destroy();
+                    this.blockArr[row][col] = undefined;
+                }
+            }
+        }
+        this.settleBlock();
+    },
+
+    /**
+     * 火箭道具
+     */
+    onRocket: function (block) {
+        for (let col = 0; col < this.colCount; col++) {
+            let block = this.blockArr[block.row][col];
+            if (block != undefined) {
+                block.node.destroy();
+                this.blockArr[block.row][col] = undefined;
+            }
+        }
+        this.settleBlock();
+    }
 
     // update (dt) {},
 });

@@ -60,7 +60,7 @@
     },
     "_is3DNode": true,
     "groupIndex": 0,
-    "autoReleaseAssets": false,
+    "autoReleaseAssets": true,
     "_id": "9b86ff81-073b-49cd-ae18-b1bbf426c92f"
   },
   {
@@ -302,7 +302,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "acdaf658-eb4e-4087-92e4-f2bf30bc42e0"
+      "__uuid__": "934a4af2-0644-4849-a02c-ebfabe2b769a"
     },
     "_type": 0,
     "_sizeMode": 0,

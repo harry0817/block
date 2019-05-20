@@ -4,35 +4,57 @@ var BaseDialog = cc.Class({
     extends: BaseDialog,
 
     properties: {
+        scoreLabel: cc.Label,
+        bestScoreLabel: cc.Label,
         homeBtn: cc.Button,
+        soundBtn: cc.Button,
+        leaderBoardBtn: cc.Button,
         continueBtn: cc.Button,
-        restartBtn: cc.Button
+        newGameBtn: cc.Button
     },
 
     onLoad() {
         this._super();
-        this.homeBtn.node.on('click', this.home, this);
-        this.continueBtn.node.on('click', this.continue, this);
-        this.restartBtn.node.on('click', this.restart, this);
+        this.homeBtn.node.on('click', this.onHome, this);
+        this.soundBtn.node.on('click', this.onSound, this);
+        this.leaderBoardBtn.node.on('click', this.onLeaderBoard, this);
+        this.continueBtn.node.on('click', this.onContinue, this);
+        this.newGameBtn.node.on('click', this.onNewGame, this);
     },
 
-    home: function () {
+    setScore: function (score) {
+        this.scoreLabel.string = score;
+    },
+
+    setBestScore: function (bestScore) {
+        this.bestScoreLabel.string = bestScore;
+    },
+
+    onHome: function () {
         this.dismissImmediately();
         this.game.gotoHome();
     },
 
-    continue: function () {
+    onSound: function () {
+
+    },
+
+    onLeaderBoard: function () {
+
+    },
+
+    onContinue: function () {
         this.dismiss();
     },
 
-    restart: function () {
+    onNewGame: function () {
         this.dismiss();
-        this.game.restartGame();
+        this.game.newGame();
     },
 
     show: function (game) {
-        this.game = game;
         this._super();
+        this.game = game;
     }
 
     // update (dt) {},

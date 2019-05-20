@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PixelColor</title>
+  <meta name="viewport"
+        content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,maximum-scale=1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="full-screen" content="yes"/>
+  <meta name="screen-orientation" content="portrait"/>
+  <link rel="stylesheet" type="text/css" href="style-mobile.css"/>
+</head>
+<body>
+  <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
+  <script src="https://connect.facebook.net/en_US/fbinstant.6.2.js"></script>
+  <script src="src/settings.js" charset="utf-8"></script>
+  <script src="vconsole.min.js"></script>
+  <script type="text/javascript">
+(function () {
+    'use strict';
+    function boot () {
+        var settings = window._CCSettings;
+        window._CCSettings = undefined;
+
+        if ( !settings.debug ) {
+            var uuids = settings.uuids;
+
+            var rawAssets = settings.rawAssets;
+            var assetTypes = settings.assetTypes;
+            var realRawAssets = settings.rawAssets = {};
+            var count = 0;
+            for (var mount in rawAssets) {
+                console.log(++count);
+                var entries = rawAssets[mount];
+                var realEntries = realRawAssets[mount] = {};
+                for (var id in entries) {
+                    var entry = entries[id];
+                    var type = entry[1];
+                    // retrieve minified raw asset
+                    if (typeof type === 'number') {
+                        entry[1] = assetTypes[type];
+                    }
+                    // retrieve uuid
+                    realEntries[uuids[id] || id] = entry;
+                }
+            }
+
+            var scenes = settings.scenes;
+            for (var i = 0; i < scenes.length; ++i) {
+                console.log(++count);
+                var scene = scenes[i];
+                if (typeof scene.uuid === 'number') {
+                    scene.uuid = uuids[scene.uuid];
+                }
+            }
+
+            var packedAssets = settings.packedAssets;
+            for (var packId in packedAssets) {
+                console.log(++count);
+                var packedIds = packedAssets[packId];
+                for (var j = 0; j < packedIds.length; ++j) {
+                    if (typeof packedIds[j] === 'number') {
+                        packedIds[j] = uuids[packedIds[j]];
+                    }
+                }
+            }
+        }
+
+        // init engine
+        var canvas;
+
+        if (cc.sys.isBrowser) {
+            canvas = document.getElementById('GameCanvas');
+        }
+
+        function setLoadingDisplay () {
+            // Loading splash scene
+            cc.loader.onProgress = function (completedCount, totalCount, item) {
+                var progress = 100 * completedCount / totalCount;
+                console.log(completedCount + "/" + totalCount + " = " + progress);
+                FBInstant.setLoadingProgress(progress);
+            };
+        }
+
+        var onStart = function () {
+            cc.view.resizeWithBrowserSize(true);
+
+            if (cc.sys.isBrowser) {
+                // setLoadingDisplay();
+            }
+
+            if (cc.sys.isMobile) {
+                if (settings.orientation === 'landscape') {
+                    cc.view.setOrientation(cc.macro.ORIENTATION_LANDSCAPE);
+                }
+                else if (settings.orientation === 'portrait') {
+                    cc.view.setOrientation(cc.macro.ORIENTATION_PORTRAIT);
+                }
+                // qq, wechat, baidu
+                cc.view.enableAutoFullScreen(
+                    cc.sys.browserType !== cc.sys.BROWSER_TYPE_BAIDU &&
+                    cc.sys.browserType !== cc.sys.BROWSER_TYPE_WECHAT &&
+                    cc.sys.browserType !== cc.sys.BROWSER_TYPE_MOBILE_QQ
+                );
+            }
+            if (cc.sys.isBrowser && cc.sys.os === cc.sys.OS_ANDROID) {
+                cc.macro.DOWNLOAD_MAX_CONCURRENT = 4;
+            }
+
+            cc.AssetLibrary.init({
+                libraryPath: 'res/import',
+                rawAssetsBase: 'res/raw-',
+                rawAssets: settings.rawAssets,
+                packedAssets: settings.packedAssets,
+                md5AssetsMap: settings.md5AssetsMap
+            });
+
+            var launchScene = settings.launchScene;
+            cc.director.preloadScene(launchScene,
+                function () {
+                    FBInstant.startGameAsync()
+                    .then(function () {
+                        cc.director.loadScene(launchScene,
+                            function () {
+                                console.log('Success to load scene: ' + launchScene);
+                                cc.loader.onProgress = null;
+                            }
+                        );
+                    })
+                    .catch(function (e) { cc.error(e); });
+                }
+            );
+        };
+
+        var jsList = settings.jsList;
+        var bundledScript = settings.debug ? 'src/project.dev.js' : 'src/project.js';
+        if (jsList) {
+            jsList = jsList.map(function (x) { return 'src/' + x; });
+            jsList.push(bundledScript);
+        }
+        else {
+            jsList = [bundledScript];
+        }
+
+        if (cc.sys.isNative && cc.sys.isMobile) {
+            jsList = jsList.concat(['src/anysdk/jsb_anysdk.js', 'src/anysdk/jsb_anysdk_constants.js']);
+        }
+
+        var option = {
+            width: 1,
+            height: 1,
+            id: 'GameCanvas',
+            scenes: settings.scenes,
+            debugMode: settings.debug ? cc.DebugMode.INFO : cc.DebugMode.ERROR,
+            showFPS: settings.debug,
+            frameRate: 60,
+            jsList: jsList,
+            groupList: settings.groupList,
+            collisionMatrix: settings.collisionMatrix,
+            renderMode: 0
+        };
+
+        cc.game.run(option, onStart);
+    }
+
+    window.onload = function() {
+
+        FBInstant.initializeAsync()
+        .then(function () {
+            startFakeProgress();
+            cocos2d = document.createElement('script');
+            cocos2d.async = true;
+            cocos2d.src = window._CCSettings.debug ? 'cocos2d-js.js' : 'cocos2d-js-min.js';
+            cocos2d.addEventListener('load', engineLoaded, false);
+            document.body.appendChild(cocos2d);
+        });
+
+        var cocos2d;
+
+        var engineLoaded = function () {
+            document.body.removeChild(cocos2d);
+            cocos2d.removeEventListener('load', engineLoaded, false);
+            if (typeof VConsole !== 'undefined') {
+                window.vConsole = new VConsole();
+            }
+            boot();
+        };
+
+
+        var isLaunchScenePreloaded = false;
+        function startFakeProgress() {
+            var fakeProgress = 0;
+            function timedCount(){
+                if(isLaunchScenePreloaded){
+                    return;
+                }
+                fakeProgress++;
+                FBInstant.setLoadingProgress( 100 * fakeProgress / 100);
+                if(fakeProgress <= 89){
+                    setTimeout(timedCount,150);
+                }
+            }
+            timedCount();
+        }
+    };
+
+})();
+  </script>
+
+</body>
+</html>
