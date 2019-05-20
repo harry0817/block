@@ -17,20 +17,20 @@ var BaseDialog = cc.Class({
     },
 
     home: function () {
-        
+        this.dismissImmediately();
+        this.game.gotoHome();
     },
 
     continue: function () {
-
+        this.dismiss();
     },
 
     restart: function () {
-
+        this.dismiss();
+        this.game.restartGame();
     },
 
     show: function (game) {
-        console.log('PauseDialog show');
-        
         this.game = game;
         this._super();
     }

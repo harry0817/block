@@ -3,17 +3,15 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        dialogCanvas: cc.Node,
+        bg: cc.Node,
+        dialogPanel: cc.Node,
     },
 
     onLoad() {
-        cc.game.addPersistRootNode(this.dialogCanvas);
-        let childNodeArr = this.dialogCanvas.children;
-        for (let i = 0; i < childNodeArr.length; i++) {
-
-            // cc.game.addPersistRootNode(childNodeArr[i]);
-
-        }
+        let canvas = cc.find('Canvas');
+        console.log('canvas:' + canvas.getContentSize());
+        cc.game.addPersistRootNode(this.dialogPanel);
+        cc.director.preloadScene('Game');
     },
 
     start() {
@@ -21,7 +19,7 @@ cc.Class({
     },
 
     startGame: function () {
-        cc.director.loadScene("Game");
+        cc.director.loadScene('Game');
     }
 
     // update (dt) {},

@@ -42,23 +42,28 @@ cc.Class({
     },
 
     onLoad() {
+        this.gameUI.init(this);
         this.initData();
         this.initListener();
         this.initView();
         this.generateBlock();
 
         let action = cc.sequence(
-            cc.moveBy(1,100,100),
+            cc.moveBy(0.2, 100, 100),
             cc.callFunc(function () {
                 console.log('1');
-                
+
             }, this)
         );
-        let newAction = cc.sequence(action, cc.callFunc(function(){
+        let newAction = cc.sequence(action, cc.callFunc(function () {
             console.log('2');
-            
+
         }, this));
-        this.blockPanel.runAction(newAction);
+        // this.blockPanel.runAction(newAction);
+    },
+
+    start() {
+
     },
 
     initData: function () {
@@ -82,8 +87,22 @@ cc.Class({
         console.log('blockPanel:(' + this.blockPanel.width + ',' + this.blockPanel.height + ')');
     },
 
-    start() {
+    gotoHome: function () {
+        cc.director.loadScene('Home');
+    },
 
+    restartGame: function () {
+        console.log('restartGame');
+        for (let row = 0; row < this.blockArr.length; row++) {
+            for (let col = 0; col < this.blockArr[row].length; col++) {
+                let block = this.blockArr[row][col];
+                if (block != null) {
+                    block.node.destroy();
+                    console.log(this.blockArr[row][col]);
+                }
+            }
+        }
+        this.generateBlock();
     },
 
     onblockPanelTouchEvent: function (event) {
@@ -214,7 +233,7 @@ cc.Class({
                     // this.scheduleOnce(function () {
                     //     let point = block.point * Math.pow(2, movingAction.combineCount - 1);
                     //     block.setPoint(point);
-                    //     block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(point)]);
+                    //     block.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
                     //     this.score += (this.comboCount > 1 ? point * 4 : point * 2);
                     //     this.gameUI.updateScore(this.score);
                     // }, this.normalMoveDuration);
@@ -222,7 +241,7 @@ cc.Class({
                     let finished = cc.callFunc(function () {
                         let point = block.point * Math.pow(2, movingAction.combineCount - 1);
                         block.setPoint(point);
-                        block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(point)]);
+                        block.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
                         this.score += (this.comboCount > 1 ? point * 4 : point * 2);
                         this.gameUI.updateScore(this.score);
                     }, this);
@@ -377,29 +396,15 @@ cc.Class({
         let block = blockNode.getComponent("Block");
         block.row = this.rowCount;
         block.col = Math.floor(this.colCount / 2);
-        let point = this.randomPoint();
+        let point = Utils.randomPoint();
         block.setPoint(point);
-        block.setBgSpriteFrame(this.blockSpriteFrame[this.calculateIndex(point)]);
+        block.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
         let position = this.convertIndexToPosition(block.row, block.col);
         blockNode.setPosition(position);
 
         this.blockPanel.addChild(blockNode);
         this.newBlock = block;
     },
-
-    randomPoint: function () {
-        let exponent = Utils.randomNum(3);
-        return Math.pow(2, exponent);
-    },
-
-    calculateIndex: function (point) {
-        let index = 0;
-        while (point > 2) {
-            point /= 2;
-            index++;
-        }
-        return index;
-    }
 
     // update (dt) {},
 });

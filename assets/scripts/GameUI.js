@@ -28,7 +28,7 @@ cc.Class({
     showPauseDialog: function () {
         let dialogNode = cc.instantiate(this.pauseDialogPrefab);
         let dialog = dialogNode.getComponent('PauseDialog');
-        dialog.show(this);
+        dialog.show(this.game);
 
         dialogNode.once('dismiss', function (event) {
             

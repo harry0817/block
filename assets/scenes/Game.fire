@@ -736,13 +736,13 @@
       "__uuid__": "737d83be-996c-413b-98a2-7e2a7ba695d1"
     },
     "_N$hoverSprite": {
-      "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
+      "__uuid__": "0bbe34c1-63a6-4876-813b-a3c2987b877b"
     },
     "hoverSprite": {
-      "__uuid__": "f0048c10-f03e-4c97-b9d3-3506e1d58952"
+      "__uuid__": "0bbe34c1-63a6-4876-813b-a3c2987b877b"
     },
     "_N$disabledSprite": {
-      "__uuid__": "29158224-f8dd-4661-a796-1ffab537140e"
+      "__uuid__": "0bbe34c1-63a6-4876-813b-a3c2987b877b"
     },
     "_N$target": {
       "__id__": 11
