@@ -1,5 +1,6 @@
 var Utils = require('Utils');
 var GameUI = require('GameUI');
+var GameData = require('GameData');
 
 cc.Class({
     extends: cc.Component,
@@ -31,10 +32,10 @@ cc.Class({
         //key:Block value:Action
         this.tempRemovedBlockArr = new Array();
         this.tempActionArr = new Array();
-        for (let i = 0; i < this.rowCount + 1; i++) {
-            this.blockArr[i] = new Array();
-            for (let j = 0; j < this.colCount; j++) {
-                this.blockArr[i][j] = undefined;
+        for (let row = 0; row < this.rowCount + 1; row++) {
+            this.blockArr[row] = new Array();
+            for (let col = 0; col < this.colCount; col++) {
+                this.blockArr[row][col] = undefined;
             }
         }
         this.userCanOperate = true;
@@ -44,9 +45,6 @@ cc.Class({
         this.gameUI.init(this);
         this.initData();
         this.initListener();
-        this.initView();
-
-        this.generateBlock();
     },
 
     start() {
@@ -54,7 +52,52 @@ cc.Class({
     },
 
     initData: function () {
+        this.initSize();
+        let hasOldGame = this.readGame();
+        if (!hasOldGame) {
+            this.generateNewBlock();
+        }
+    },
 
+    initSize: function () {
+        this.blockSize = new cc.Vec2();
+        this.blockSize.x = (this.blockPanel.width - this.paddingLeft - this.paddingRight) / this.colCount - this.spacing.x;
+        this.blockSize.y = this.blockSize.x * this.blockSizeRatio.y / this.blockSizeRatio.x;
+        this.blockPanel.height = this.paddingTop + this.paddingBottom + (this.rowCount + 1) * this.blockSize.y + this.rowCount * this.spacing.y;
+        console.log('block:' + this.blockSize);
+        console.log('blockPanel:' + this.blockPanel.width + ',' + this.blockPanel.height);
+    },
+
+    readGame: function () {
+        let hasOldGame = false;
+        let lastGameJson = GameData.instance.lastGameData;
+        if (lastGameJson != undefined) {
+            hasOldGame = true;
+            let gameData = JSON.parse(lastGameJson);
+            let blockIntArr = gameData.blockIntArr;
+            for (let row = 0; row < blockIntArr.length; row++) {
+                for (let col = 0; col < blockIntArr[row].length; col++) {
+                    if (blockIntArr[row][col] != -1) {
+                        this.blockArr[row][col] = this.generateBlock(row, col, blockIntArr[row][col]);
+                    }
+                }
+            }
+            this.score = gameData.score;
+            this.generateNewBlock(gameData.newBlockPoint);
+            this.gameUI.updateScore(this.score);
+        }
+        return hasOldGame;
+    },
+
+    saveGame: function () {
+        let blockIntArr = Utils.toIntegerArr(this.blockArr);
+        let gameData = {
+            blockIntArr: blockIntArr,
+            score: this.score,
+            newBlockPoint: this.newBlock.point
+        };
+        let gameDataJson = JSON.stringify(gameData);
+        GameData.instance.lastGameData = gameDataJson;
     },
 
     initListener: function () {
@@ -64,27 +107,15 @@ cc.Class({
         this.blockPanel.on(cc.Node.EventType.TOUCH_CANCEL, this.onblockPanelTouchEvent, this);
     },
 
-    initView: function () {
-        this.gameUI.updateScore(this.score);
-        this.blockSize = new cc.Vec2();
-        this.blockSize.x = (this.blockPanel.width - this.paddingLeft - this.paddingRight) / this.colCount - this.spacing.x;
-        this.blockSize.y = this.blockSize.x * this.blockSizeRatio.y / this.blockSizeRatio.x;
-        this.blockPanel.height = this.paddingTop + this.paddingBottom + (this.rowCount + 1) * this.blockSize.y + this.rowCount * this.spacing.y;
-        console.log('block:' + this.blockSize);
-        console.log('blockPanel:' + this.blockPanel.width + ',' + this.blockPanel.height);
+    gotoHome: function () {
+        this.saveGame();
+        this.onGameEnd();
+        cc.director.loadScene('Home');
     },
 
-    gotoHome: function () {
-
-        let intArr = Utils.toIntegerArr(this.blockArr);
-        let gameData = {
-            blockArr: intArr,
-            score: this.score
-        };
-        console.log(JSON.stringify(gameData));
-
-        cc.sys.localStorage.setItem('gameData', JSON.stringify(gameData));
-        cc.director.loadScene('Home');
+    restartGame: function () {
+        this.onGameEnd();
+        this.newGame();
     },
 
     newGame: function () {
@@ -103,7 +134,16 @@ cc.Class({
             this.newBlock = undefined;
         }
         this.userCanOperate = true;
-        this.generateBlock();
+        this.generateNewBlock();
+    },
+
+    onGameEnd: function () {
+        //更新最高分
+        if (this.score > GameData.instance.bestScore) {
+            GameData.instance.bestScore = this.score;
+        }
+        this.score = 0;
+        this.gameUI.updateScore(this.score);
     },
 
     onblockPanelTouchEvent: function (event) {
@@ -137,12 +177,13 @@ cc.Class({
                     if (lastBlockThisCol != undefined && lastBlockThisCol.point != (this.newBlock.point)) {
                         //游戏失败
                         this.gameUI.showFailedDialog();
+                        this.onGameEnd();
                     } else {
                         this.comboCount = 0;
                         this.blockArr[this.newBlock.row][col] = this.newBlock;
                         this.newBlock.col = col;
 
-                        this.randomBombItem();
+                        // this.randomBombItem();
                         this.settleBlock(true);
                     }
                 }
@@ -151,7 +192,7 @@ cc.Class({
     },
 
     settleBlock: function (emission = false) {
-        // console.log('settleBlock');
+        console.log('settleBlock');
         this.tempActionArr.splice(0, this.tempActionArr.length);
         this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
         for (let col = 0; col < this.blockArr[0].length; col++) {
@@ -174,11 +215,11 @@ cc.Class({
         }
 
         if (this.tempActionArr.length > 0) {
-            let duration;
             for (let i = 0; i < this.tempActionArr.length; i++) {
                 let movingAction = this.tempActionArr[i];
                 let block = movingAction.block;
-                duration = emission ? (block.row - movingAction.toRow) * this.emissionDuration : this.normalMoveDuration;
+                console.log('settle:' + block.toString() + ' to (' + movingAction.toRow + ',' + movingAction.toCol + ')');
+                let duration = emission ? (block.row - movingAction.toRow) * this.emissionDuration : this.normalMoveDuration;
                 this.blockArr[block.row][block.col] = undefined;
                 this.blockArr[movingAction.toRow][movingAction.toCol] = block;
                 block.row = movingAction.toRow;
@@ -194,7 +235,7 @@ cc.Class({
                 block.node.runAction(action);
             }
         } else {
-            this.scheduleOnce(this.combineBlock, 0.2);
+            this.scheduleOnce(this.combineBlock, 0);
         }
     },
 
@@ -216,7 +257,7 @@ cc.Class({
             for (let i = 0; i < this.tempActionArr.length; i++) {
                 let movingAction = this.tempActionArr[i];
                 let block = movingAction.block;
-                // console.log('move:' + block.toString() + ' to (' + movingAction.toRow + ',' + movingAction.toCol + ')');
+                console.log('move:' + block.toString() + ' to (' + movingAction.toRow + ',' + movingAction.toCol + ')');
                 let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
                 let action = cc.moveTo(this.normalMoveDuration, position);
                 block.node.runAction(action);
@@ -226,7 +267,7 @@ cc.Class({
                 for (let i = 0; i < this.tempUpgradeBlockArr.length; i++) {
                     let upgradeBlock = this.tempUpgradeBlockArr[i];
                     let point = upgradeBlock.point * Math.pow(2, upgradeBlock.combineBlockArr.length);
-                    // console.log('upgrade:' + upgradeBlock.toString() + ' to ' + point);
+                    console.log('upgrade:' + upgradeBlock.toString() + ' to ' + point);
                     upgradeBlock.setPoint(point);
                     upgradeBlock.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
                     this.score += (this.comboCount >= 2 ? point * 4 : point * 2);
@@ -234,17 +275,17 @@ cc.Class({
 
                     for (let j = 0; j < upgradeBlock.combineBlockArr.length; j++) {
                         let combineBlock = upgradeBlock.combineBlockArr[j];
-                        // console.log('destroy:' + combineBlock.toString());
+                        console.log('destroy:' + combineBlock.toString());
                         combineBlock.node.destroy();
                         this.blockArr[combineBlock.row][combineBlock.col] = undefined;
                     }
                     upgradeBlock.clearCombineBlock();
                 }
             }, this);
-            let action = cc.sequence(cc.delayTime(this.normalMoveDuration), upgradeAction, cc.callFunc(this.settleBlock, this));
+            let action = cc.sequence(cc.delayTime(this.normalMoveDuration), upgradeAction, cc.delayTime(0), cc.callFunc(this.settleBlock, this));
             this.node.runAction(action);
         } else {
-            this.generateBlock();
+            this.generateNewBlock();
             this.userCanOperate = true;
             this.gameUI.showCombo(this.comboCount);
         }
@@ -409,29 +450,35 @@ cc.Class({
         return new cc.Vec2(x, y);
     },
 
+    generateNewBlock: function (point = -1) {
+        let row = this.rowCount;
+        let col = Math.floor(this.colCount / 2);
+        if (point == -1) {
+            point = Utils.randomPoint();
+        }
+        this.newBlock = this.generateBlock(row, col, point);
+    },
+
     /**
      * 随机生成新的块
      */
-    generateBlock: function () {
+    generateBlock: function (row, col, point) {
         let blockNode = cc.instantiate(this.blockPrefab);
         //size、position
         blockNode.width = this.blockSize.x;
         blockNode.height = this.blockSize.y;
         let block = blockNode.getComponent("Block");
         block.init(this);
-        block.row = this.rowCount;
-        block.col = Math.floor(this.colCount / 2);
+        block.row = row;
+        block.col = col;
         let position = this.convertIndexToPosition(block.row, block.col);
         blockNode.setPosition(position);
         //point
-        let point = Utils.randomPoint();
         block.setPoint(point);
         block.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
         //
         this.blockPanel.addChild(blockNode);
-        this.newBlock = block;
-        //
-        Utils.logBlockArr(this.blockArr);
+        return block;
     },
 
     /**

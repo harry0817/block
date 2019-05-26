@@ -1,31 +1,31 @@
 {
   "ver": "2.3.0",
-  "uuid": "1bb3ea6b-9917-4077-aaee-47d0fe131fa7",
+  "uuid": "63a11fe1-fcbb-443f-8e9a-e774c695ac94",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
   "platformSettings": {},
   "subMetas": {
-    "游戏中-金币数字底2-01": {
+    "通用-小按钮图标-音量开-01": {
       "ver": "1.0.4",
-      "uuid": "9f9bfce0-d317-4864-b3d9-2e5b4393ad30",
-      "rawTextureUuid": "1bb3ea6b-9917-4077-aaee-47d0fe131fa7",
+      "uuid": "2fc72a3d-05ad-4d19-837d-5b73db4a0925",
+      "rawTextureUuid": "63a11fe1-fcbb-443f-8e9a-e774c695ac94",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
       "offsetX": 0,
       "offsetY": 0,
-      "trimX": 0,
-      "trimY": 0,
-      "width": 358,
-      "height": 100,
-      "rawWidth": 358,
+      "trimX": 5,
+      "trimY": 16,
+      "width": 90,
+      "height": 68,
+      "rawWidth": 100,
       "rawHeight": 100,
       "borderTop": 0,
       "borderBottom": 0,
-      "borderLeft": 100,
-      "borderRight": 100,
+      "borderLeft": 0,
+      "borderRight": 0,
       "subMetas": {}
     }
   }

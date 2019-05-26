@@ -49,7 +49,7 @@ var BaseDialog = cc.Class({
 
     onNewGame: function () {
         this.dismiss();
-        this.game.newGame();
+        this.game.restartGame();
     },
 
     show: function (game) {

@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.0",
+  "uuid": "ee6fcdb4-94be-4372-84b5-8a34db612b18",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "游戏中-激励文字4-01": {
+      "ver": "1.0.4",
+      "uuid": "db090ea1-362f-4c0c-bf7d-e90b49fe3152",
+      "rawTextureUuid": "ee6fcdb4-94be-4372-84b5-8a34db612b18",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 3,
+      "trimY": 7,
+      "width": 578,
+      "height": 74,
+      "rawWidth": 584,
+      "rawHeight": 88,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

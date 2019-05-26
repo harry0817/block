@@ -1,16 +1,16 @@
 {
   "ver": "2.3.0",
-  "uuid": "1bb3ea6b-9917-4077-aaee-47d0fe131fa7",
+  "uuid": "450b2c2d-c81a-44b3-9879-14af972fa6f3",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
   "platformSettings": {},
   "subMetas": {
-    "游戏中-金币数字底2-01": {
+    "游戏中-下排道具-锤子2-01": {
       "ver": "1.0.4",
-      "uuid": "9f9bfce0-d317-4864-b3d9-2e5b4393ad30",
-      "rawTextureUuid": "1bb3ea6b-9917-4077-aaee-47d0fe131fa7",
+      "uuid": "c00e08a3-b06e-432f-9ec8-f5c8ead6bae8",
+      "rawTextureUuid": "450b2c2d-c81a-44b3-9879-14af972fa6f3",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
@@ -18,14 +18,14 @@
       "offsetY": 0,
       "trimX": 0,
       "trimY": 0,
-      "width": 358,
-      "height": 100,
-      "rawWidth": 358,
-      "rawHeight": 100,
+      "width": 172,
+      "height": 150,
+      "rawWidth": 172,
+      "rawHeight": 150,
       "borderTop": 0,
       "borderBottom": 0,
-      "borderLeft": 100,
-      "borderRight": 100,
+      "borderLeft": 0,
+      "borderRight": 0,
       "subMetas": {}
     }
   }

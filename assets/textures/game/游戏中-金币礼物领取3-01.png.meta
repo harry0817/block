@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.0",
+  "uuid": "0e3d4405-75cf-42e6-97b3-605e9aa01a64",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": true,
+  "platformSettings": {},
+  "subMetas": {
+    "游戏中-金币礼物领取3-01": {
+      "ver": "1.0.4",
+      "uuid": "10cfb0e8-a066-4cb3-b74b-99ed9f502c62",
+      "rawTextureUuid": "0e3d4405-75cf-42e6-97b3-605e9aa01a64",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 1,
+      "trimX": 11,
+      "trimY": 9,
+      "width": 176,
+      "height": 64,
+      "rawWidth": 198,
+      "rawHeight": 84,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

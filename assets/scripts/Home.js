@@ -1,15 +1,17 @@
+var HomeUI = require('HomeUI');
+var GameData = require('GameData');
 
 cc.Class({
     extends: cc.Component,
 
     properties: {
-        bg: cc.Node,
+        homeUI: HomeUI,
         dialogPanel: cc.Node,
     },
 
     onLoad() {
-        let canvas = cc.find('Canvas');
-        console.log('canvas:' + canvas.getContentSize());
+        // cc.sys.localStorage.clear();
+        this.homeUI.init(this);
         cc.game.addPersistRootNode(this.dialogPanel);
         cc.director.preloadScene('Game');
     },
@@ -18,7 +20,7 @@ cc.Class({
 
     },
 
-    startGame: function () {
+    playGame: function () {
         cc.director.loadScene('Game');
     }
 

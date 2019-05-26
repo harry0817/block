@@ -1,31 +1,31 @@
 {
   "ver": "2.3.0",
-  "uuid": "1bb3ea6b-9917-4077-aaee-47d0fe131fa7",
+  "uuid": "adb6b61d-7c90-425f-8db8-03f6423f5306",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
   "platformSettings": {},
   "subMetas": {
-    "游戏中-金币数字底2-01": {
+    "游戏中-激励文字1-01": {
       "ver": "1.0.4",
-      "uuid": "9f9bfce0-d317-4864-b3d9-2e5b4393ad30",
-      "rawTextureUuid": "1bb3ea6b-9917-4077-aaee-47d0fe131fa7",
+      "uuid": "10255e30-df6a-4b73-800e-f634cea78ae5",
+      "rawTextureUuid": "adb6b61d-7c90-425f-8db8-03f6423f5306",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
       "offsetX": 0,
       "offsetY": 0,
-      "trimX": 0,
+      "trimX": 99,
       "trimY": 0,
-      "width": 358,
-      "height": 100,
-      "rawWidth": 358,
-      "rawHeight": 100,
+      "width": 386,
+      "height": 88,
+      "rawWidth": 584,
+      "rawHeight": 88,
       "borderTop": 0,
       "borderBottom": 0,
-      "borderLeft": 100,
-      "borderRight": 100,
+      "borderLeft": 0,
+      "borderRight": 0,
       "subMetas": {}
     }
   }

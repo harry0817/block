@@ -1,16 +1,16 @@
 {
   "ver": "2.3.0",
-  "uuid": "1bb3ea6b-9917-4077-aaee-47d0fe131fa7",
+  "uuid": "cdb0842c-7ae4-4ed5-8966-3709ef3a6aff",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
   "platformSettings": {},
   "subMetas": {
-    "游戏中-金币数字底2-01": {
+    "游戏中-金币礼物领取1-01": {
       "ver": "1.0.4",
-      "uuid": "9f9bfce0-d317-4864-b3d9-2e5b4393ad30",
-      "rawTextureUuid": "1bb3ea6b-9917-4077-aaee-47d0fe131fa7",
+      "uuid": "901ec5ed-472c-402c-a456-a96a53572f48",
+      "rawTextureUuid": "cdb0842c-7ae4-4ed5-8966-3709ef3a6aff",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
@@ -18,14 +18,14 @@
       "offsetY": 0,
       "trimX": 0,
       "trimY": 0,
-      "width": 358,
-      "height": 100,
-      "rawWidth": 358,
-      "rawHeight": 100,
+      "width": 198,
+      "height": 84,
+      "rawWidth": 198,
+      "rawHeight": 84,
       "borderTop": 0,
       "borderBottom": 0,
-      "borderLeft": 100,
-      "borderRight": 100,
+      "borderLeft": 0,
+      "borderRight": 0,
       "subMetas": {}
     }
   }

@@ -2,13 +2,23 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
+        //top
         pauseBtn: cc.Button,
         scoreLabel: cc.Label,
-        pauseDialogPrefab: cc.Prefab,
-        failedDialogPrefab: cc.Prefab,
+        giftBtn: cc.Button,
+        //bottom
+        coinLabel: cc.Label,
+        hammerBtn: cc.Button,
+        hammerCountLabel: cc.Label,
         refreshbtn: cc.Button,
+        refreshCountLabel: cc.Label,
+        //game
+        combo: cc.Node,
         comboSprite: cc.Sprite,
         comboSpArr: [cc.SpriteFrame],
+        //dialog prefab
+        pauseDialogPrefab: cc.Prefab,
+        failedDialogPrefab: cc.Prefab,
     },
 
     init(game) {
