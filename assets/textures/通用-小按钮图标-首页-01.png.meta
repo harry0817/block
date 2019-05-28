@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.0",
+  "uuid": "33f6916c-7fdc-44e6-89d5-a14d38cb7239",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "通用-小按钮图标-首页-01": {
+      "ver": "1.0.4",
+      "uuid": "8ae54f02-d220-49b0-bea2-194de51253c0",
+      "rawTextureUuid": "33f6916c-7fdc-44e6-89d5-a14d38cb7239",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 9,
+      "trimY": 13,
+      "width": 82,
+      "height": 74,
+      "rawWidth": 100,
+      "rawHeight": 100,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

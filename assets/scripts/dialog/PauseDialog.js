@@ -1,6 +1,9 @@
 var BaseDialog = require('BaseDialog');
+var i18n = require('LanguageData');
+var Toggle = require('Toggle');
+var GameData = require('GameData');
 
-var BaseDialog = cc.Class({
+cc.Class({
     extends: BaseDialog,
 
     properties: {
@@ -8,6 +11,7 @@ var BaseDialog = cc.Class({
         bestScoreLabel: cc.Label,
         homeBtn: cc.Button,
         soundBtn: cc.Button,
+        soundToggle: Toggle,
         leaderBoardBtn: cc.Button,
         continueBtn: cc.Button,
         newGameBtn: cc.Button
@@ -15,6 +19,9 @@ var BaseDialog = cc.Class({
 
     onLoad() {
         this._super();
+
+        this.soundToggle.setCheck(GameData.instance.sound == 'true');
+
         this.homeBtn.node.on('click', this.onHome, this);
         this.soundBtn.node.on('click', this.onSound, this);
         this.leaderBoardBtn.node.on('click', this.onLeaderBoard, this);
@@ -27,7 +34,7 @@ var BaseDialog = cc.Class({
     },
 
     setBestScore: function (bestScore) {
-        this.bestScoreLabel.string = bestScore;
+        this.bestScoreLabel.string = i18n.t('best_score') + ':' + bestScore;
     },
 
     onHome: function () {
@@ -36,7 +43,14 @@ var BaseDialog = cc.Class({
     },
 
     onSound: function () {
-
+        let soundOn = GameData.instance.sound;
+        if (soundOn == 'true') {
+            GameData.instance.sound = false;
+            this.soundToggle.setCheck(false);
+        } else {
+            GameData.instance.sound = true;
+            this.soundToggle.setCheck(true);
+        }
     },
 
     onLeaderBoard: function () {

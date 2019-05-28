@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.0",
+  "uuid": "97685417-f26b-421c-a8fa-f3ecb27fdc48",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "游戏中-字块道具-火箭-01": {
+      "ver": "1.0.4",
+      "uuid": "dd43b63b-aec5-45d8-b223-bc1c82720c0c",
+      "rawTextureUuid": "97685417-f26b-421c-a8fa-f3ecb27fdc48",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 88,
+      "height": 114,
+      "rawWidth": 88,
+      "rawHeight": 114,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

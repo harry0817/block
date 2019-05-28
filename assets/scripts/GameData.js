@@ -61,6 +61,31 @@ var GameData = cc.Class({
             set: function (value) {
                 cc.sys.localStorage.setItem('hammer_count', value);
             }
+        },
+        //设置
+        sound: {//声音
+            get: function () {
+                let _sound = cc.sys.localStorage.getItem('setting_sound');
+                if (_sound == undefined) {
+                    return true;
+                }
+                return _sound;
+            },
+            set: function (value) {
+                cc.sys.localStorage.setItem('setting_sound', value);
+            }
+        },
+        vibration: {//震动
+            get: function () {
+                let _vibration = cc.sys.localStorage.getItem('setting_vibration');
+                if (_vibration == undefined) {
+                    return true;
+                }
+                return _vibration;
+            },
+            set: function (value) {
+                cc.sys.localStorage.setItem('setting_vibration', value);
+            }
         }
     },
 

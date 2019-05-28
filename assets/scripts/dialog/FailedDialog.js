@@ -1,6 +1,6 @@
 var BaseDialog = require('BaseDialog');
 
-var BaseDialog = cc.Class({
+cc.Class({
     extends: BaseDialog,
 
     properties: {
@@ -15,6 +15,10 @@ var BaseDialog = cc.Class({
         this.newGameBtn.node.on('click', this.onNewGame, this);
     },
 
+    setScore: function (score) {
+        this.scoreLabel.string = score;
+    },
+
     onShare: function () {
         this.dismiss();
         //TODO
@@ -22,6 +26,7 @@ var BaseDialog = cc.Class({
 
     onNewGame: function () {
         this.game.newGame();
+        this.dismiss();
     },
 
     show: function (game) {

@@ -4384,25 +4384,27 @@
     "comboSprite": {
       "__id__": 57
     },
-    "comboSpArr": [
-      {
-        "__uuid__": "10255e30-df6a-4b73-800e-f634cea78ae5"
-      },
-      {
-        "__uuid__": "7daffa1b-df88-41cd-87c1-03b3e7dda0f9"
-      },
-      {
-        "__uuid__": "a3956664-d528-45c8-ad27-333a667cfaa9"
-      },
-      {
-        "__uuid__": "db090ea1-362f-4c0c-bf7d-e90b49fe3152"
-      }
-    ],
+    "comboSpriteFrameArr": [],
     "pauseDialogPrefab": {
       "__uuid__": "6eae918d-cc02-42c0-b784-12d806eec596"
     },
     "failedDialogPrefab": {
-      "__uuid__": "42e9dbfa-b75b-4678-b0a6-fc4b3219234a"
+      "__uuid__": "3d9adffe-2637-4724-9637-1b251f966a0f"
+    },
+    "itemDialogPrefab": {
+      "__uuid__": "0517dc60-a396-4d56-91be-6c141ef5f756"
+    },
+    "bombSpriteFrame": {
+      "__uuid__": "aea8d8a6-199c-40ff-969b-d19591cd9ceb"
+    },
+    "rocketSpriteFrame": {
+      "__uuid__": "dd43b63b-aec5-45d8-b223-bc1c82720c0c"
+    },
+    "refreshSpriteFrame": {
+      "__uuid__": "8f8942e2-8e26-4139-adfb-d3381646cdfb"
+    },
+    "hammerSpriteFrame": {
+      "__uuid__": "8c9fe13e-8ca3-4116-b001-f64c3824df2d"
     },
     "_id": "8bkapOdehM9bCEJWke1ozJ"
   },
@@ -4437,6 +4439,9 @@
     "emissionDuration": 0.05,
     "blockPanel": {
       "__id__": 33
+    },
+    "launchBasePrefab": {
+      "__uuid__": "da818e30-2e55-4586-a4d5-29ae1a05c02f"
     },
     "blockPrefab": {
       "__uuid__": "4d2d4e47-0b3c-4759-954c-6fa5c5b83db4"

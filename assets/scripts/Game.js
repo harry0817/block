@@ -18,6 +18,7 @@ cc.Class({
         normalMoveDuration: 0.2,
         emissionDuration: 0.05,
         blockPanel: cc.Node,
+        launchBasePrefab: cc.Prefab,
         blockPrefab: cc.Prefab,
         blockSpriteFrame: [cc.SpriteFrame]
     },
@@ -43,6 +44,8 @@ cc.Class({
 
     onLoad() {
         this.gameUI.init(this);
+        this.initSize();
+        this.initView();
         this.initData();
         this.initListener();
     },
@@ -52,7 +55,6 @@ cc.Class({
     },
 
     initData: function () {
-        this.initSize();
         let hasOldGame = this.readGame();
         if (!hasOldGame) {
             this.generateNewBlock();
@@ -98,6 +100,18 @@ cc.Class({
         };
         let gameDataJson = JSON.stringify(gameData);
         GameData.instance.lastGameData = gameDataJson;
+    },
+
+    initView: function () {
+        for (let col = 0; col < this.colCount; col++) {
+            let launchBase = cc.instantiate(this.launchBasePrefab);
+            //size、position
+            launchBase.width = this.blockSize.x - 20;
+            launchBase.height = this.blockSize.y - 20;
+            let position = this.convertIndexToPosition(this.rowCount, col);
+            launchBase.setPosition(position);
+            this.blockPanel.addChild(launchBase);
+        }
     },
 
     initListener: function () {

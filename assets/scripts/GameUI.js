@@ -1,3 +1,6 @@
+var GameData = require('GameData');
+var Types = require('Types');
+
 cc.Class({
     extends: cc.Component,
 
@@ -15,10 +18,15 @@ cc.Class({
         //game
         combo: cc.Node,
         comboSprite: cc.Sprite,
-        comboSpArr: [cc.SpriteFrame],
+        comboSpriteFrameArr: [cc.SpriteFrame],
         //dialog prefab
         pauseDialogPrefab: cc.Prefab,
         failedDialogPrefab: cc.Prefab,
+        itemDialogPrefab: cc.Prefab,
+        bombSpriteFrame: cc.SpriteFrame,
+        rocketSpriteFrame: cc.SpriteFrame,
+        refreshSpriteFrame: cc.SpriteFrame,
+        hammerSpriteFrame: cc.SpriteFrame,
     },
 
     init(game) {
@@ -28,6 +36,9 @@ cc.Class({
     onLoad() {
         this.pauseBtn.node.on('click', this.showPauseDialog, this);
         this.refreshbtn.node.on('click', this.onRefreshBtnClick, this);
+        this.hammerBtn.node.on('click', this.onHammerBtnClick, this);
+
+        this.coinLabel.string = GameData.instance.coinCount;
     },
 
     start() {
@@ -42,31 +53,50 @@ cc.Class({
         let dialogNode = cc.instantiate(this.pauseDialogPrefab);
         let pauseDialog = dialogNode.getComponent('PauseDialog');
         pauseDialog.setScore(this.game.score);
-        pauseDialog.setBestScore(999);
+        pauseDialog.setBestScore(GameData.instance.bestScore);
         pauseDialog.show(this.game);
     },
 
     showFailedDialog: function () {
         let dialogNode = cc.instantiate(this.failedDialogPrefab);
-        let dialog = dialogNode.getComponent('FailedDialog');
-        dialog.show(this.game);
+        let failedDialog = dialogNode.getComponent('FailedDialog');
+        failedDialog.setScore(this.game.score);
+        failedDialog.show(this.game);
+    },
 
-        dialogNode.once('dismiss', function (event) {
-
-        }, this);
+    showItemDialog: function (itemType, itemSpriteFrame) {
+        let dialogNode = cc.instantiate(this.itemDialogPrefab);
+        let itemDialog = dialogNode.getComponent('ItemDialog');
+        itemDialog.setItemSprite(itemSpriteFrame);
+        itemDialog.setItemType(itemType);
+        itemDialog.show(this.game);
     },
 
     onRefreshBtnClick: function () {
-        this.game.refreshNewBlock();
+        if (GameData.instance.refreshCount > 0) {
+            GameData.instance.refreshCount--;
+            this.game.refreshNewBlock();
+        } else {
+            this.showItemDialog(Types.ItemType.Refresh, this.rocketSpriteFrame);
+        }
+    },
+
+    onHammerBtnClick: function () {
+        if (GameData.instance.hammerCount > 0) {
+            GameData.instance.hammerCount--;
+            //TODO
+        } else {
+            this.showItemDialog(Types.ItemType.Hammer, this.hammerSpriteFrame);
+        }
     },
 
     showCombo: function (comboCount) {
         console.log('comboCount:' + comboCount);
 
         if (comboCount >= 2) {
-            let index = Math.min(this.comboSpArr.length - 1, comboCount - 2);
+            let index = Math.min(this.comboSpriteFrameArr.length - 1, comboCount - 2);
             this.comboSprite.node.active = true;
-            this.comboSprite.spriteFrame = this.comboSpArr[index];
+            this.comboSprite.spriteFrame = this.comboSpriteFrameArr[index];
             this.comboSprite.node.opacity = 0;
             let fadeIn = cc.fadeIn(0.5);
             let fadeOut = cc.fadeOut(0.5);

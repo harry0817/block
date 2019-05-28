@@ -1,5 +1,6 @@
 var GameData = require('GameData');
 var i18n = require('LanguageData');
+var Toggle = require('Toggle');
 
 cc.Class({
     extends: cc.Component,
@@ -11,7 +12,9 @@ cc.Class({
         playGameBtn: cc.Button,
         leaderBoardBtn: cc.Button,
         soundBtn: cc.Button,
+        soundToggle: Toggle,
         vibrationBtn: cc.Button,
+        vibrationToggle: Toggle,
         shareBtn: cc.Button,
     },
 
@@ -34,6 +37,11 @@ cc.Class({
         this.bestScore.active = bestScore > 0;
         this.bestScoreLabel.string = i18n.t('best_score') + ':' + GameData.instance.bestScore;
         this.coinLabel.string = GameData.instance.coinCount;
+
+        console.log(GameData.instance.sound == 'true');
+
+        this.soundToggle.setCheck(GameData.instance.sound == 'true');
+        this.vibrationToggle.setCheck(GameData.instance.vibration == 'true');
     },
 
     initListener: function () {
@@ -53,11 +61,25 @@ cc.Class({
     },
 
     onSound: function () {
-
+        let soundOn = GameData.instance.sound;
+        if (soundOn == 'true') {
+            GameData.instance.sound = false;
+            this.soundToggle.setCheck(false);
+        } else {
+            GameData.instance.sound = true;
+            this.soundToggle.setCheck(true);
+        }
     },
 
     onVibration: function () {
-
+        let vibrationOn = GameData.instance.vibration;
+        if (vibrationOn == 'true') {
+            GameData.instance.vibration = false;
+            this.vibrationToggle.setCheck(false);
+        } else {
+            GameData.instance.vibration = true;
+            this.vibrationToggle.setCheck(true);
+        }
     },
 
     onShare: function () {
