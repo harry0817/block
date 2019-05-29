@@ -1,6 +1,7 @@
 var Utils = require('Utils');
 var GameUI = require('GameUI');
 var GameData = require('GameData');
+var Types = require('Types');
 
 cc.Class({
     extends: cc.Component,
@@ -26,6 +27,7 @@ cc.Class({
     ctor() {
         this.score = 0;
         this.comboCount = 0;
+        this.currentHighestBlock = 2;
         this.blockArr = new Array();
 
         this.tempSettlingBlockArr = new Array();
@@ -196,6 +198,7 @@ cc.Class({
                         this.comboCount = 0;
                         this.blockArr[this.newBlock.row][col] = this.newBlock;
                         this.newBlock.col = col;
+                        this.newBlock = undefined;
 
                         // this.randomBombItem();
                         this.settleBlock(true);
@@ -465,6 +468,9 @@ cc.Class({
     },
 
     generateNewBlock: function (point = -1) {
+        if (this.newBlock != undefined) {
+            return;
+        }
         let row = this.rowCount;
         let col = Math.floor(this.colCount / 2);
         if (point == -1) {
@@ -496,22 +502,6 @@ cc.Class({
     },
 
     /**
-     * 刷新待加入的块
-     */
-    refreshNewBlock: function () {
-        if (this.userCanOperate) {
-            if (this.newBlock != undefined) {
-                var point = this.newBlock.point;
-                while (point == this.newBlock.point) {
-                    point = Utils.randomPoint();
-                }
-                this.newBlock.setPoint(point);
-                this.newBlock.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
-            }
-        }
-    },
-
-    /**
      * 随机分配道具
      */
     randomBombItem: function () {
@@ -528,6 +518,10 @@ cc.Class({
     /**
      * 炸弹道具
      */
+    onBombClick: function () {
+        this.gameUI.showItemDialog(Types.ItemType.Bomb);
+    },
+
     onBomb: function (block) {
         let startRow = Math.max(0, block.row - 1);
         let endRow = Math.min(this.rowCount - 1, block.row + 1);
@@ -548,6 +542,10 @@ cc.Class({
     /**
      * 火箭道具
      */
+    onRocketClick: function () {
+        this.gameUI.showItemDialog(Types.ItemType.Rocket);
+    },
+
     onRocket: function (block) {
         for (let col = 0; col < this.colCount; col++) {
             let block = this.blockArr[block.row][col];
@@ -557,7 +555,61 @@ cc.Class({
             }
         }
         this.settleBlock();
-    }
+    },
+
+    /**
+     * 刷新待加入的块
+     */
+    refreshNewBlock: function () {
+        if (this.userCanOperate) {
+            if (this.newBlock != undefined) {
+                if (GameData.instance.refreshCount > 0) {
+                    GameData.instance.refreshCount--;
+                    this.gameUI.updateItemCount();
+
+                    var point = this.newBlock.point;
+                    while (point == this.newBlock.point) {
+                        point = Utils.randomPoint();
+                    }
+                    this.newBlock.setPoint(point);
+                    this.newBlock.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
+                } else {
+                    this.gameUI.showItemDialog(Types.ItemType.Refresh);
+                }
+            }
+        }
+    },
+
+    setHammerEnabled: function (enabled) {
+        if (this.userCanOperate) {
+            if (GameData.instance.hammerCount > 0) {
+                for (let row = 0; row < this.rowCount; row++) {
+                    for (let col = 0; col < this.colCount; col++) {
+                        let block = this.blockArr[row][col];
+                        if (block != undefined) {
+                            block.setHammerEnabled(enabled);
+                        }
+                    }
+                }
+            } else {
+                this.gameUI.showItemDialog(Types.ItemType.Hammer);
+            }
+        }
+    },
+
+    /**
+     * 锤子道具
+     */
+    onHammer: function (block) {
+        this.setHammerEnabled(false);
+
+        GameData.instance.hammerCount--;
+        this.gameUI.updateItemCount();
+
+        block.node.destroy();
+        this.blockArr[block.row][block.col] = undefined;
+        this.settleBlock();
+    },
 
     // update (dt) {},
 });

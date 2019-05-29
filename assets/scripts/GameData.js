@@ -38,7 +38,10 @@ var GameData = cc.Class({
                 cc.sys.localStorage.setItem('coin_count', value);
             }
         },
-        refreshCount: {//刷新道具
+        /**
+         * 道具
+         */
+        refreshCount: {//刷新
             get: function () {
                 let _refreshCount = cc.sys.localStorage.getItem('refresh_count');
                 if (_refreshCount == undefined) {
@@ -50,7 +53,7 @@ var GameData = cc.Class({
                 cc.sys.localStorage.setItem('refresh_count', value);
             }
         },
-        hammerCount: {//锤子道具
+        hammerCount: {//锤子
             get: function () {
                 let _hammerCount = cc.sys.localStorage.getItem('hammer_count');
                 if (_hammerCount == undefined) {

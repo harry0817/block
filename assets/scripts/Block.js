@@ -11,7 +11,7 @@ cc.Class({
         row: -1,
         col: -1,
         hasBomb: false,
-        hasRocket: false
+        hasRocket: false,
     },
 
     onLoad() {
@@ -55,11 +55,18 @@ cc.Class({
         this.rocket.active = show;
     },
 
+    setHammerEnabled(enabled) {
+        this.btn.enabled = enabled;
+        this.hammerEnabled = enabled;
+    },
+
     onClick: function () {
-        if (this.hasBomb) {
-            this.game.onBomb(this);
+        if (this.hammerEnabled) {
+            this.game.onHammer(this);
+        } else if (this.hasBomb) {
+            this.game.onBombClick(this);
         } else if (this.hasRocket) {
-            this.game.onRocket(this);
+            this.game.onRocketClick(this);
         }
     },
 

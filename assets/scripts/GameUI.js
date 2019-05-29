@@ -34,21 +34,33 @@ cc.Class({
     },
 
     onLoad() {
+        this.initView();
+        this.initListener();
+    },
+
+    initView: function () {
+        this.updateCoinCount();
+        this.updateItemCount();
+    },
+
+    initListener: function () {
         this.pauseBtn.node.on('click', this.showPauseDialog, this);
         this.refreshbtn.node.on('click', this.onRefreshBtnClick, this);
         this.hammerBtn.node.on('click', this.onHammerBtnClick, this);
+    },
 
+    updateCoinCount: function () {
         this.coinLabel.string = GameData.instance.coinCount;
     },
 
-    start() {
-
+    updateItemCount: function () {
+        this.hammerCountLabel.string = GameData.instance.hammerCount;
+        this.refreshCountLabel.string = GameData.instance.refreshCount;
     },
 
     updateScore: function (score) {
         this.scoreLabel.string = score;
     },
-
     showPauseDialog: function () {
         let dialogNode = cc.instantiate(this.pauseDialogPrefab);
         let pauseDialog = dialogNode.getComponent('PauseDialog');
@@ -64,30 +76,39 @@ cc.Class({
         failedDialog.show(this.game);
     },
 
-    showItemDialog: function (itemType, itemSpriteFrame) {
+    showItemDialog: function (itemType) {
         let dialogNode = cc.instantiate(this.itemDialogPrefab);
         let itemDialog = dialogNode.getComponent('ItemDialog');
-        itemDialog.setItemSprite(itemSpriteFrame);
         itemDialog.setItemType(itemType);
+        switch (itemType) {
+            case Types.ItemType.Bomb:
+                itemDialog.setItemSprite(this.bombSpriteFrame);
+                break;
+            case Types.ItemType.Rocket:
+                itemDialog.setItemSprite(this.rocketSpriteFrame);
+                break;
+            case Types.ItemType.Refresh:
+                itemDialog.setItemSprite(this.refreshSpriteFrame);
+                break;
+            case Types.ItemType.Hammer:
+                itemDialog.setItemSprite(this.hammerSpriteFrame);
+                break;
+        }
         itemDialog.show(this.game);
     },
 
+    /**
+     * 刷新
+     */
     onRefreshBtnClick: function () {
-        if (GameData.instance.refreshCount > 0) {
-            GameData.instance.refreshCount--;
-            this.game.refreshNewBlock();
-        } else {
-            this.showItemDialog(Types.ItemType.Refresh, this.rocketSpriteFrame);
-        }
+        this.game.refreshNewBlock();
     },
 
+    /**
+     * 锤子
+     */
     onHammerBtnClick: function () {
-        if (GameData.instance.hammerCount > 0) {
-            GameData.instance.hammerCount--;
-            //TODO
-        } else {
-            this.showItemDialog(Types.ItemType.Hammer, this.hammerSpriteFrame);
-        }
+        this.game.setHammerEnabled(true);
     },
 
     showCombo: function (comboCount) {

@@ -31,6 +31,6 @@ window.i18n.languages['en'] = {
         'rank': 'Friendly ranking',
     },
     'item_dialog': {
-        'title': 'GET BOOST',
+        'title': 'GET BOOST'
     }
 };

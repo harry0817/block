@@ -1,5 +1,7 @@
 var BaseDialog = require('BaseDialog');
 var Types = require('Types');
+var i18n = require('LanguageData');
+var GameData = require('GameData');
 
 cc.Class({
     extends: BaseDialog,
@@ -17,16 +19,26 @@ cc.Class({
         this.videoBtn.node.on('click', this.onWatchVideo, this);
     },
 
-    setItemLabel: function (text) {
-        this.itemLabel.string = text;
+    setBlock: function (block) {
+        this.block = block;
     },
 
     setItemType: function (itemType) {
         this.itemType = itemType;
-    },
-
-    setBlock: function (block) {
-        this.block = block;
+        switch (this.itemType) {
+            case Types.ItemType.Bomb:
+                this.itemLabel.string = i18n.t('item.bomb') + ' x1';
+                break;
+            case Types.ItemType.Rocket:
+                this.itemLabel.string = i18n.t('item.rocket') + ' x1';
+                break;
+            case Types.ItemType.Refresh:
+                this.itemLabel.string = i18n.t('item.refresh') + ' x1';
+                break;
+            case Types.ItemType.Hammer:
+                this.itemLabel.string = i18n.t('item.hammer') + ' x1';
+                break;
+        }
     },
 
     setItemSprite: function (itemSpriteFrame) {
@@ -48,14 +60,24 @@ cc.Class({
     },
 
     onPurchase: function () {
-        //TODO
+        // if (GameData.instance.coinCount >= 30) {
+        //     GameData.instance.coinCount -= 30;
+        //     this.onPurchaseResult(true);
+        //     this.game.gameUI.updateCoinCount();
+        //     this.dismiss();
+        // } else {
+        //     //TODO 提示金币不足
+
+        // }
+
         this.onPurchaseResult(true);
         this.dismiss();
     },
 
     onWatchVideo: function () {
         //TODO
-        onWatchVideoResult(true);
+
+        this.onWatchVideoResult(true);
         this.dismiss();
     },
 
@@ -64,7 +86,7 @@ cc.Class({
     },
 
     onWatchVideoResult: function (reward) {
-        this.onResult(success);
+        this.onResult(reward);
     },
 
     onResult: function (success) {
@@ -77,10 +99,12 @@ cc.Class({
                     this.game.onRocket(this.block);
                     break;
                 case Types.ItemType.Refresh:
-                    this.game.refreshNewBlock();
+                    GameData.instance.refreshCount++;
+                    this.game.gameUI.updateItemCount();
                     break;
                 case Types.ItemType.Hammer:
-
+                    GameData.instance.hammerCount++;
+                    this.game.gameUI.updateItemCount();
                     break;
             }
         }

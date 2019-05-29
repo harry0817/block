@@ -1,6 +1,7 @@
 var GameData = require('GameData');
-var i18n = require('LanguageData');
 var Toggle = require('Toggle');
+const i18n = require('LanguageData');
+i18n.init(cc.sys.language);
 
 cc.Class({
     extends: cc.Component,
@@ -20,16 +21,8 @@ cc.Class({
 
     init(home) {
         this.home = home;
-    },
-
-    onLoad() {
-        i18n.init(cc.sys.language);
         this.initView();
         this.initListener();
-    },
-
-    start() {
-
     },
 
     initView: function () {
@@ -37,8 +30,6 @@ cc.Class({
         this.bestScore.active = bestScore > 0;
         this.bestScoreLabel.string = i18n.t('best_score') + ':' + GameData.instance.bestScore;
         this.coinLabel.string = GameData.instance.coinCount;
-
-        console.log(GameData.instance.sound == 'true');
 
         this.soundToggle.setCheck(GameData.instance.sound == 'true');
         this.vibrationToggle.setCheck(GameData.instance.vibration == 'true');

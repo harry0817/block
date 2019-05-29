@@ -1,5 +1,4 @@
 var HomeUI = require('HomeUI');
-var GameData = require('GameData');
 
 cc.Class({
     extends: cc.Component,
@@ -16,13 +15,8 @@ cc.Class({
         cc.director.preloadScene('Game');
     },
 
-    start() {
-
-    },
-
     playGame: function () {
         cc.director.loadScene('Game');
     }
 
-    // update (dt) {},
 });
