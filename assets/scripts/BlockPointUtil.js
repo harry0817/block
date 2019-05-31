@@ -1,41 +1,67 @@
-// Learn cc.Class:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/class.html
-//  - [English] http://docs.cocos2d-x.org/creator/manual/en/scripting/class.html
-// Learn Attribute:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/reference/attributes.html
-//  - [English] http://docs.cocos2d-x.org/creator/manual/en/scripting/reference/attributes.html
-// Learn life-cycle callbacks:
-//  - [Chinese] https://docs.cocos.com/creator/manual/zh/scripting/life-cycle-callbacks.html
-//  - [English] https://www.cocos2d-x.org/docs/creator/manual/en/scripting/life-cycle-callbacks.html
 
-cc.Class({
-    extends: cc.Component,
+const BlockPointManager = cc.Class({
+
+    statics: {
+        firstLimitPoint: 2048,
+        firstLimitExponent: 7,
+    },
 
     properties: {
-        // foo: {
-        //     // ATTRIBUTES:
-        //     default: null,        // The default value will be used only when the component attaching
-        //                           // to a node for the first time
-        //     type: cc.SpriteFrame, // optional, default is typeof default
-        //     serializable: true,   // optional, default is true
-        // },
-        // bar: {
-        //     get () {
-        //         return this._bar;
-        //     },
-        //     set (value) {
-        //         this._bar = value;
-        //     }
-        // },
-    },
-
-    // LIFE-CYCLE CALLBACKS:
-
-    // onLoad () {},
-
-    start () {
 
     },
 
-    // update (dt) {},
+    ctor() {
+        this.reset();
+    },
+
+    set: function (highestPoint, highestExponent, reachHighestPointCount) {
+        this.highestPoint = highestPoint;
+        this.highestExponent = highestExponent;
+        this.reachHighestPointCount = reachHighestPointCount;
+    },
+
+    reset: function () {
+        console.log('reset');
+        this.highestPoint = 4;
+        this.highestExponent = 2;
+        this.reachHighestPointCount = 0;
+    },
+
+    setPoint: function (point) {
+        if (point >= this.highestPoint) {
+            this.highestPoint = point;
+            if (point >= BlockPointManager.firstLimitPoint) {
+                this.reachHighestPointCount++;
+                if (this.reachHighestPointCount > 3) {
+                    this.reachHighestPointCount = 0;
+                    this.highestExponent++;
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                let exponent = Math.log2(point);
+                this.highestExponent = Math.min(exponent, BlockPointManager.firstLimitExponent - 1);
+            }
+        }
+        return true;
+    },
+
+    randomPoint: function () {
+        let exponent = randomNum(this.highestExponent);
+        return Math.pow(2, exponent);
+    },
+
+    randomNum: function (minNum, maxNum) {
+        switch (arguments.length) {
+            case 1:
+                return parseInt(Math.random() * minNum + 1, 10);
+            case 2:
+                return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
+            default:
+                return 0;
+        }
+    },
 });
+
+module.exports = BlockPointManager;

@@ -2,6 +2,7 @@ var Utils = require('Utils');
 var GameUI = require('GameUI');
 var GameData = require('GameData');
 var Types = require('Types');
+var BlockPointManager = require('BlockPointManager');
 
 cc.Class({
     extends: cc.Component,
@@ -25,6 +26,7 @@ cc.Class({
     },
 
     ctor() {
+        console.log(BlockPointManager.randomPoint());
         this.score = 0;
         this.comboCount = 0;
         this.currentHighestBlock = 2;
@@ -145,7 +147,7 @@ cc.Class({
                 }
             }
         }
-        if (this.newBlock != null) {
+        if (this.newBlock != undefined) {
             this.newBlock.node.destroy();
             this.newBlock = undefined;
         }
@@ -285,8 +287,9 @@ cc.Class({
                     let upgradeBlock = this.tempUpgradeBlockArr[i];
                     let point = upgradeBlock.point * Math.pow(2, upgradeBlock.combineBlockArr.length);
                     console.log('upgrade:' + upgradeBlock.toString() + ' to ' + point);
+                    BlockPointManager.setPoint(point);
                     upgradeBlock.setPoint(point);
-                    upgradeBlock.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
+                    upgradeBlock.setBgSpriteFrame(this.blockSpriteFrame[Math.log2(point) - 1]);
                     this.score += (this.comboCount >= 2 ? point * 4 : point * 2);
                     this.gameUI.updateScore(this.score);
 
@@ -474,7 +477,9 @@ cc.Class({
         let row = this.rowCount;
         let col = Math.floor(this.colCount / 2);
         if (point == -1) {
-            point = Utils.randomPoint();
+
+
+            point = BlockPointManager.randomPoint();
         }
         this.newBlock = this.generateBlock(row, col, point);
     },
@@ -495,7 +500,7 @@ cc.Class({
         blockNode.setPosition(position);
         //point
         block.setPoint(point);
-        block.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
+        block.setBgSpriteFrame(this.blockSpriteFrame[Math.log2(point) - 1]);
         //
         this.blockPanel.addChild(blockNode);
         return block;
@@ -569,10 +574,10 @@ cc.Class({
 
                     var point = this.newBlock.point;
                     while (point == this.newBlock.point) {
-                        point = Utils.randomPoint();
+                        point = BlockPointManager.randomPoint();
                     }
                     this.newBlock.setPoint(point);
-                    this.newBlock.setBgSpriteFrame(this.blockSpriteFrame[Utils.calculateIndex(point)]);
+                    this.newBlock.setBgSpriteFrame(this.blockSpriteFrame[Math.log2(point) - 1]);
                 } else {
                     this.gameUI.showItemDialog(Types.ItemType.Refresh);
                 }

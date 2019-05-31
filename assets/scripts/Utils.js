@@ -14,20 +14,11 @@ function randomNum(minNum, maxNum) {
     }
 }
 
-function calculateIndex(point) {
-    let index = 0;
-    while (point > 2) {
-        point /= 2;
-        index++;
-    }
-    return index;
-}
-
 function logBlockArr(blockArr) {
     for (let row = 0; row < blockArr.length; row++) {
         let colStr = '';
         for (let col = 0; col < blockArr[row].length; col++) {
-            if (blockArr[row][col] != null) {
+            if (blockArr[row][col] != undefined) {
                 colStr += blockArr[row][col].point + ' ';
             } else {
                 colStr += '* ';
@@ -56,7 +47,6 @@ function toIntegerArr(blockArr) {
 module.exports = {
     randomPoint: randomPoint,
     randomNum: randomNum,
-    calculateIndex: calculateIndex,
     logBlockArr: logBlockArr,
     toIntegerArr: toIntegerArr,
 };
