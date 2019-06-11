@@ -1,5 +1,6 @@
+var Utils = require('Utils');
 
-const BlockPointManager = cc.Class({
+const BlockPointUtil = cc.Class({
 
     statics: {
         firstLimitPoint: 2048,
@@ -7,7 +8,9 @@ const BlockPointManager = cc.Class({
     },
 
     properties: {
-
+        highestPoint: 4,
+        highestExponent: 2,
+        reachHighestPointCount: 0,
     },
 
     ctor() {
@@ -30,7 +33,7 @@ const BlockPointManager = cc.Class({
     setPoint: function (point) {
         if (point >= this.highestPoint) {
             this.highestPoint = point;
-            if (point >= BlockPointManager.firstLimitPoint) {
+            if (point >= BlockPointUtil.firstLimitPoint) {
                 this.reachHighestPointCount++;
                 if (this.reachHighestPointCount > 3) {
                     this.reachHighestPointCount = 0;
@@ -41,27 +44,16 @@ const BlockPointManager = cc.Class({
                 }
             } else {
                 let exponent = Math.log2(point);
-                this.highestExponent = Math.min(exponent, BlockPointManager.firstLimitExponent - 1);
+                this.highestExponent = Math.min(exponent, BlockPointUtil.firstLimitExponent - 1);
             }
         }
         return true;
     },
 
     randomPoint: function () {
-        let exponent = randomNum(this.highestExponent);
+        let exponent = Utils.randomNum(this.highestExponent);
         return Math.pow(2, exponent);
-    },
-
-    randomNum: function (minNum, maxNum) {
-        switch (arguments.length) {
-            case 1:
-                return parseInt(Math.random() * minNum + 1, 10);
-            case 2:
-                return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
-            default:
-                return 0;
-        }
     },
 });
 
-module.exports = BlockPointManager;
+module.exports = BlockPointUtil;

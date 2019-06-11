@@ -4363,6 +4363,9 @@
     "giftBtn": {
       "__id__": 30
     },
+    "storedCoinLabel": {
+      "__id__": 25
+    },
     "coinLabel": {
       "__id__": 66
     },

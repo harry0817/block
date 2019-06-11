@@ -1,7 +1,3 @@
-function randomPoint() {
-    let exponent = randomNum(3);
-    return Math.pow(2, exponent);
-}
 
 function randomNum(minNum, maxNum) {
     switch (arguments.length) {
@@ -45,7 +41,6 @@ function toIntegerArr(blockArr) {
 }
 
 module.exports = {
-    randomPoint: randomPoint,
     randomNum: randomNum,
     logBlockArr: logBlockArr,
     toIntegerArr: toIntegerArr,

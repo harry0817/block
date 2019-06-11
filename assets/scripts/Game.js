@@ -2,7 +2,7 @@ var Utils = require('Utils');
 var GameUI = require('GameUI');
 var GameData = require('GameData');
 var Types = require('Types');
-var BlockPointManager = require('BlockPointManager');
+var BlockPointUtil = require('BlockPointUtil');
 
 cc.Class({
     extends: cc.Component,
@@ -26,7 +26,7 @@ cc.Class({
     },
 
     ctor() {
-        console.log(BlockPointManager.randomPoint());
+        this.BlockPointUtil = new BlockPointUtil();
         this.score = 0;
         this.comboCount = 0;
         this.currentHighestBlock = 2;
@@ -89,8 +89,9 @@ cc.Class({
                 }
             }
             this.score = gameData.score;
-            this.generateNewBlock(gameData.newBlockPoint);
             this.gameUI.updateScore(this.score);
+            this.generateNewBlock(gameData.newBlockPoint);
+            this.BlockPointUtil.set(gameData.highestPoint, gameData.highestExponent, gameData.reachHighestPointCount);
         }
         return hasOldGame;
     },
@@ -100,7 +101,10 @@ cc.Class({
         let gameData = {
             blockIntArr: blockIntArr,
             score: this.score,
-            newBlockPoint: this.newBlock.point
+            newBlockPoint: this.newBlock.point,
+            highestPoint: this.BlockPointUtil.highestPoint,
+            highestExponent: this.BlockPointUtil.highestExponent,
+            reachHighestPointCount: this.BlockPointUtil.reachHighestPointCount,
         };
         let gameDataJson = JSON.stringify(gameData);
         GameData.instance.lastGameData = gameDataJson;
@@ -152,6 +156,7 @@ cc.Class({
             this.newBlock = undefined;
         }
         this.userCanOperate = true;
+        this.BlockPointUtil.reset();
         this.generateNewBlock();
     },
 
@@ -192,7 +197,9 @@ cc.Class({
                     this.userCanOperate = false;
                     let col = this.convertPositionToCol(this.newBlock.node.getPosition());
                     let lastBlockThisCol = this.blockArr[this.rowCount - 1][col];
-                    if (lastBlockThisCol != undefined && lastBlockThisCol.point != (this.newBlock.point)) {
+                    if (lastBlockThisCol != undefined
+                        && !lastBlockThisCol.isCoin
+                        && lastBlockThisCol.point != (this.newBlock.point)) {
                         //游戏失败
                         this.gameUI.showFailedDialog();
                         this.onGameEnd();
@@ -200,10 +207,10 @@ cc.Class({
                         this.comboCount = 0;
                         this.blockArr[this.newBlock.row][col] = this.newBlock;
                         this.newBlock.col = col;
-                        this.newBlock = undefined;
 
                         // this.randomBombItem();
                         this.settleBlock(true);
+                        this.newBlock = undefined;
                     }
                 }
                 break;
@@ -216,15 +223,21 @@ cc.Class({
         this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
         for (let col = 0; col < this.blockArr[0].length; col++) {
             let emptyRow = -1;
+            let claimCoin = false;
             for (let row = 0; row < this.blockArr.length; row++) {
                 let block = this.blockArr[row][col];
                 if (emptyRow == -1) {
                     if (block == undefined) {
                         emptyRow = row;
+                    } else if (block.isCoin) {
+                        claimCoin = true;
+                        emptyRow = row;
                     }
                 } else {
                     if (block != undefined) {
                         let movingAction = this.generateAction(block, emptyRow, col);
+                        movingAction.claimCoin = claimCoin;
+                        claimCoin = false;
                         this.tempActionArr.push(movingAction);
                         this.tempSettlingBlockArr.push(block);
                         emptyRow++;
@@ -243,19 +256,39 @@ cc.Class({
                 this.blockArr[movingAction.toRow][movingAction.toCol] = block;
                 block.row = movingAction.toRow;
                 block.col = movingAction.toCol;
+
+                let finish = cc.callFunc(function () {
+                    if (movingAction.claimCoin) {
+                        this.claimCoin();
+                    }
+                    if (i == this.tempActionArr.length - 1) {
+                        this.combineBlock();
+                    }
+                }, this);
                 let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
-                let action;
-                if (i == this.tempActionArr.length - 1) {
-                    let finished = cc.callFunc(this.combineBlock, this);
-                    action = cc.sequence(cc.moveTo(duration, position), finished);
-                } else {
-                    action = cc.moveTo(duration, position);
-                }
+                let action = cc.sequence(cc.moveTo(duration, position), finish);
                 block.node.runAction(action);
             }
         } else {
             this.scheduleOnce(this.combineBlock, 0);
         }
+    },
+
+    claimCoin: function () {
+        let giftWorldPos = this.gameUI.giftBtn.node.parent.convertToWorldSpaceAR(this.gameUI.giftBtn.node.position);
+        let startPos = this.coinBlock.node.position;
+        let endPos = this.blockPanel.convertToNodeSpaceAR(giftWorldPos);
+        let controlPos = new cc.Vec2(startPos.x, endPos.y);
+
+        let bezier = [startPos, controlPos, endPos];
+        let finish = cc.callFunc(function () {
+            GameData.instance.storedCoinCount++;
+            this.gameUI.updateStoredCoinCount();
+            this.coinBlock.node.destroy();
+            this.coinBlock = undefined;
+        }, this);
+        let action = cc.sequence(cc.bezierTo(0.3, bezier), finish);
+        this.coinBlock.node.runAction(action);
     },
 
     combineBlock: function () {
@@ -287,7 +320,7 @@ cc.Class({
                     let upgradeBlock = this.tempUpgradeBlockArr[i];
                     let point = upgradeBlock.point * Math.pow(2, upgradeBlock.combineBlockArr.length);
                     console.log('upgrade:' + upgradeBlock.toString() + ' to ' + point);
-                    BlockPointManager.setPoint(point);
+                    this.BlockPointUtil.setPoint(point);
                     upgradeBlock.setPoint(point);
                     upgradeBlock.setBgSpriteFrame(this.blockSpriteFrame[Math.log2(point) - 1]);
                     this.score += (this.comboCount >= 2 ? point * 4 : point * 2);
@@ -306,6 +339,7 @@ cc.Class({
             this.node.runAction(action);
         } else {
             this.generateNewBlock();
+            this.randomCoin();
             this.userCanOperate = true;
             this.gameUI.showCombo(this.comboCount);
         }
@@ -479,7 +513,7 @@ cc.Class({
         if (point == -1) {
 
 
-            point = BlockPointManager.randomPoint();
+            point = this.BlockPointUtil.randomPoint();
         }
         this.newBlock = this.generateBlock(row, col, point);
     },
@@ -504,6 +538,49 @@ cc.Class({
         //
         this.blockPanel.addChild(blockNode);
         return block;
+    },
+
+    /**
+     * 随机生成金币
+     */
+    randomCoin: function () {
+        if (GameData.instance.storedCoinCount < 10
+            && this.coinBlock == undefined
+            // && Utils.randomNum(99) >= 50
+        ) {
+            let colArr = [];
+            for (let col = 0; col < this.blockArr[0].length; col++) {
+                for (let row = 0; row < this.blockArr.length; row++) {
+                    let block = this.blockArr[row][col];
+                    if (block == undefined) {
+                        colArr.push([row, col]);
+                        break;
+                    }
+                }
+            }
+            if (colArr.length > 0) {
+                let blockNode = cc.instantiate(this.blockPrefab);
+                blockNode.zIndex = 100;
+                //size、position
+                blockNode.width = this.blockSize.x;
+                blockNode.height = this.blockSize.y;
+                let block = blockNode.getComponent("Block");
+                this.coinBlock = block;
+                block.init(this);
+
+                let index = Utils.randomNum(colArr.length - 1);
+                console.log('index:' + index);
+
+                block.row = colArr[index][0];
+                block.col = colArr[index][1];
+                let position = this.convertIndexToPosition(block.row, block.col);
+                blockNode.setPosition(position);
+                block.setCoin();
+                //
+                this.blockPanel.addChild(blockNode);
+                this.blockArr[block.row][block.col] = block;
+            }
+        }
     },
 
     /**
@@ -574,7 +651,7 @@ cc.Class({
 
                     var point = this.newBlock.point;
                     while (point == this.newBlock.point) {
-                        point = BlockPointManager.randomPoint();
+                        point = this.BlockPointUtil.randomPoint();
                     }
                     this.newBlock.setPoint(point);
                     this.newBlock.setBgSpriteFrame(this.blockSpriteFrame[Math.log2(point) - 1]);

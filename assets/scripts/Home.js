@@ -9,7 +9,7 @@ cc.Class({
     },
 
     onLoad() {
-        // cc.sys.localStorage.clear();
+        cc.sys.localStorage.clear();
         this.homeUI.init(this);
         cc.game.addPersistRootNode(this.dialogPanel);
         cc.director.preloadScene('Game');

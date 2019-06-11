@@ -9,6 +9,7 @@ cc.Class({
         pauseBtn: cc.Button,
         scoreLabel: cc.Label,
         giftBtn: cc.Button,
+        storedCoinLabel: cc.Label,
         //bottom
         coinLabel: cc.Label,
         hammerBtn: cc.Button,
@@ -41,6 +42,7 @@ cc.Class({
     initView: function () {
         this.updateCoinCount();
         this.updateItemCount();
+        this.updateStoredCoinCount();
     },
 
     initListener: function () {
@@ -61,6 +63,11 @@ cc.Class({
     updateScore: function (score) {
         this.scoreLabel.string = score;
     },
+
+    updateStoredCoinCount: function () {
+        this.storedCoinLabel.string = GameData.instance.storedCoinCount + '/10';
+    },
+
     showPauseDialog: function () {
         let dialogNode = cc.instantiate(this.pauseDialogPrefab);
         let pauseDialog = dialogNode.getComponent('PauseDialog');

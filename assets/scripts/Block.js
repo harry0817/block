@@ -6,12 +6,14 @@ cc.Class({
         pointLabel: cc.Label,
         bomb: cc.Node,
         rocket: cc.Node,
+        coin: cc.Node,
         btn: cc.Button,
         point: 0,
         row: -1,
         col: -1,
         hasBomb: false,
         hasRocket: false,
+        isCoin: false,
     },
 
     onLoad() {
@@ -58,6 +60,11 @@ cc.Class({
     setHammerEnabled(enabled) {
         this.btn.enabled = enabled;
         this.hammerEnabled = enabled;
+    },
+
+    setCoin: function () {
+        this.isCoin = true;
+        this.coin.active = true;
     },
 
     onClick: function () {
