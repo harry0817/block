@@ -32,5 +32,11 @@ window.i18n.languages['en'] = {
     },
     'item_dialog': {
         'title': 'GET BOOST'
+    },
+    'receive_coin_dialog': {
+        'title': 'GET COINS',
+        'now_you_have': 'NOW YOU HAVE',
+        'btn_receive': 'JUST GET %s coin',
+        'btn_reward': 'GET %s COINS'
     }
 };

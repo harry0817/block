@@ -32,5 +32,11 @@ window.i18n.languages['zh'] = {
     },
     'item_dialog': {
         'title': '获取道具',
+    },
+    'receive_coin_dialog': {
+        'title': '获取金币',
+        'now_you_have': '你有',
+        'btn_receive': '只获取%s个金币',
+        'btn_reward': '获取%s个金币'
     }
 };

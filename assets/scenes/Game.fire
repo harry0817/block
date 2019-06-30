@@ -4391,6 +4391,9 @@
     "pauseDialogPrefab": {
       "__uuid__": "6eae918d-cc02-42c0-b784-12d806eec596"
     },
+    "receiveCoinDialogPrefab": {
+      "__uuid__": "2d250491-7c2c-4b74-9a59-91f35860dea8"
+    },
     "failedDialogPrefab": {
       "__uuid__": "3d9adffe-2637-4724-9637-1b251f966a0f"
     },

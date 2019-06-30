@@ -22,6 +22,7 @@ cc.Class({
         comboSpriteFrameArr: [cc.SpriteFrame],
         //dialog prefab
         pauseDialogPrefab: cc.Prefab,
+        receiveCoinDialogPrefab: cc.Prefab,
         failedDialogPrefab: cc.Prefab,
         itemDialogPrefab: cc.Prefab,
         bombSpriteFrame: cc.SpriteFrame,
@@ -47,6 +48,7 @@ cc.Class({
 
     initListener: function () {
         this.pauseBtn.node.on('click', this.showPauseDialog, this);
+        this.giftBtn.node.on('click', this.showReceiveCoinDialog, this);
         this.refreshbtn.node.on('click', this.onRefreshBtnClick, this);
         this.hammerBtn.node.on('click', this.onHammerBtnClick, this);
     },
@@ -74,6 +76,13 @@ cc.Class({
         pauseDialog.setScore(this.game.score);
         pauseDialog.setBestScore(GameData.instance.bestScore);
         pauseDialog.show(this.game);
+    },
+
+    showReceiveCoinDialog: function () {
+        let dialogNode = cc.instantiate(this.receiveCoinDialogPrefab);
+        let receiveCoinDialog = dialogNode.getComponent('ReceiveCoinDialog');
+        receiveCoinDialog.setCoinCount(GameData.instance.storedCoinCount);
+        receiveCoinDialog.show(this.game);
     },
 
     showFailedDialog: function () {

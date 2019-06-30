@@ -37,11 +37,11 @@
     "Mesh"
   ],
   "facebook": {
-    "appID": "",
+    "appID": "623450794796337",
     "audience": {
-      "enable": false
+      "enable": true
     },
-    "enable": false,
+    "enable": true,
     "live": {
       "enable": false
     }
@@ -51,7 +51,7 @@
   "group-list": [
     "default"
   ],
-  "last-module-event-record-time": 1559119698979,
+  "last-module-event-record-time": 1561910218690,
   "simulator-orientation": false,
   "simulator-resolution": {
     "height": 640,
