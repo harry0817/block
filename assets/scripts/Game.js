@@ -85,6 +85,8 @@ cc.Class({
                 for (let col = 0; col < blockIntArr[row].length; col++) {
                     if (blockIntArr[row][col] != -1) {
                         this.blockArr[row][col] = this.generateBlock(row, col, blockIntArr[row][col]);
+                    }else{
+                        this.blockArr[row][col] = this.generateBlock(row, col, blockIntArr[row][col]);
                     }
                 }
             }
@@ -188,7 +190,6 @@ cc.Class({
                         this.newBlock.node.setPosition(position.x, position.y);
                     }
                 }
-
                 break;
             case cc.Node.EventType.TOUCH_END:
             case cc.Node.EventType.TOUCH_CANCEL:
@@ -339,7 +340,7 @@ cc.Class({
             this.node.runAction(action);
         } else {
             this.generateNewBlock();
-            this.randomCoin();
+            this.generateCoin();
             this.userCanOperate = true;
             this.gameUI.showCombo(this.comboCount);
         }
@@ -543,7 +544,7 @@ cc.Class({
     /**
      * 随机生成金币
      */
-    randomCoin: function () {
+    generateCoin: function () {
         if (GameData.instance.storedCoinCount < 10
             && this.coinBlock == undefined
             // && Utils.randomNum(99) >= 50

@@ -8,7 +8,7 @@ cc.Class({
         rocket: cc.Node,
         coin: cc.Node,
         btn: cc.Button,
-        point: 0,
+        point: -1,
         row: -1,
         col: -1,
         hasBomb: false,
