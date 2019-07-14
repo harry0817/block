@@ -81,12 +81,14 @@ cc.Class({
             hasOldGame = true;
             let gameData = JSON.parse(lastGameJson);
             let blockIntArr = gameData.blockIntArr;
+            console.log(blockIntArr);
+
             for (let row = 0; row < blockIntArr.length; row++) {
                 for (let col = 0; col < blockIntArr[row].length; col++) {
-                    if (blockIntArr[row][col] != -1) {
+                    if (blockIntArr[row][col] > 0) {
                         this.blockArr[row][col] = this.generateBlock(row, col, blockIntArr[row][col]);
-                    }else{
-                        this.blockArr[row][col] = this.generateBlock(row, col, blockIntArr[row][col]);
+                    } else if (blockIntArr[row][col] == -1) {
+                        this.blockArr[row][col] = this.generateCoin(row, col);
                     }
                 }
             }
@@ -100,6 +102,8 @@ cc.Class({
 
     saveGame: function () {
         let blockIntArr = Utils.toIntegerArr(this.blockArr);
+        console.log(blockIntArr);
+
         let gameData = {
             blockIntArr: blockIntArr,
             score: this.score,
@@ -156,6 +160,10 @@ cc.Class({
         if (this.newBlock != undefined) {
             this.newBlock.node.destroy();
             this.newBlock = undefined;
+        }
+        if (this.coinBlock != undefined) {
+            this.coinBlock.node.destroy();
+            this.coinBlock = undefined;
         }
         this.userCanOperate = true;
         this.BlockPointUtil.reset();
@@ -340,7 +348,7 @@ cc.Class({
             this.node.runAction(action);
         } else {
             this.generateNewBlock();
-            this.generateCoin();
+            this.generateNewCoin();
             this.userCanOperate = true;
             this.gameUI.showCombo(this.comboCount);
         }
@@ -512,8 +520,6 @@ cc.Class({
         let row = this.rowCount;
         let col = Math.floor(this.colCount / 2);
         if (point == -1) {
-
-
             point = this.BlockPointUtil.randomPoint();
         }
         this.newBlock = this.generateBlock(row, col, point);
@@ -541,10 +547,7 @@ cc.Class({
         return block;
     },
 
-    /**
-     * 随机生成金币
-     */
-    generateCoin: function () {
+    generateNewCoin: function () {
         if (GameData.instance.storedCoinCount < 10
             && this.coinBlock == undefined
             // && Utils.randomNum(99) >= 50
@@ -560,28 +563,22 @@ cc.Class({
                 }
             }
             if (colArr.length > 0) {
-                let blockNode = cc.instantiate(this.blockPrefab);
-                blockNode.zIndex = 100;
-                //size、position
-                blockNode.width = this.blockSize.x;
-                blockNode.height = this.blockSize.y;
-                let block = blockNode.getComponent("Block");
-                this.coinBlock = block;
-                block.init(this);
-
                 let index = Utils.randomNum(colArr.length - 1);
-                console.log('index:' + index);
-
-                block.row = colArr[index][0];
-                block.col = colArr[index][1];
-                let position = this.convertIndexToPosition(block.row, block.col);
-                blockNode.setPosition(position);
-                block.setCoin();
-                //
-                this.blockPanel.addChild(blockNode);
-                this.blockArr[block.row][block.col] = block;
+                this.generateCoin(colArr[index][0], colArr[index][1]);
             }
         }
+    },
+
+    /**
+     * 随机生成金币
+     */
+    generateCoin: function (row, col) {
+        let coin = this.generateBlock(row, col, -1);
+        coin.setCoin();
+        coin.node.zIndex = 100;
+        this.blockArr[row][col] = coin;
+        this.coinBlock = coin;
+        return coin;
     },
 
     /**
@@ -629,9 +626,9 @@ cc.Class({
         this.gameUI.showItemDialog(Types.ItemType.Rocket);
     },
 
-    onRocket: function (block) {
+    onRocket: function (originBlock) {
         for (let col = 0; col < this.colCount; col++) {
-            let block = this.blockArr[block.row][col];
+            let block = this.blockArr[originBlock.row][col];
             if (block != undefined) {
                 block.node.destroy();
                 this.blockArr[block.row][col] = undefined;

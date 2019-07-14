@@ -8,7 +8,12 @@ cc.Class({
         rocket: cc.Node,
         coin: cc.Node,
         btn: cc.Button,
-        point: -1,
+        /**
+         * >0:方块
+         * =0:空
+         * -1:金币
+         */
+        point: 0,
         row: -1,
         col: -1,
         hasBomb: false,
@@ -30,7 +35,9 @@ cc.Class({
 
     setPoint: function (point) {
         this.point = point;
-        this.pointLabel.string = point;
+        if (point > 0) {
+            this.pointLabel.string = point;
+        }
     },
 
     setBgSpriteFrame: function (spriteFrame) {

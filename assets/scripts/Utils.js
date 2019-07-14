@@ -31,9 +31,9 @@ function toIntegerArr(blockArr) {
         for (let col = 0; col < blockArr[row].length; col++) {
             let block = blockArr[row][col];
             if (block != undefined) {
-                arr[row].push(block.point);
+                arr[row][col] = block.point;
             } else {
-                arr[row].push(-1);
+                arr[row][col] = 0;
             }
         }
     }

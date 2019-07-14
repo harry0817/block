@@ -34,10 +34,14 @@ cc.Class({
     onWatchVideo: function () {
         var preloadedRewardedVideo = null;
 
+        console.log("onWatchVideo");
+        
+        let self = this;
         FBInstant.getRewardedVideoAsync(
             '623450794796337_640112573130159', // Your Ad Placement Id
         ).then(function (rewarded) {
             // Load the Ad asynchronously
+            console.log('Load Rewarded video');
             preloadedRewardedVideo = rewarded;
             return preloadedRewardedVideo.loadAsync();
         }).then(function () {
@@ -46,8 +50,8 @@ cc.Class({
                 .then(function () {
                     // Perform post-ad success operation
                     console.log('Rewarded video watched successfully');
-                    this.onReceiveCoin(10 * this.coinCount);
-                    this.dismiss();
+                    self.onReceiveCoin(10 * this.coinCount);
+                    self.dismiss();
                 })
                 .catch(function (e) {
                     console.error(e.message);
