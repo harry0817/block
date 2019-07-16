@@ -4387,7 +4387,20 @@
     "comboSprite": {
       "__id__": 57
     },
-    "comboSpriteFrameArr": [],
+    "comboSpriteFrameArr": [
+      {
+        "__uuid__": "10255e30-df6a-4b73-800e-f634cea78ae5"
+      },
+      {
+        "__uuid__": "7daffa1b-df88-41cd-87c1-03b3e7dda0f9"
+      },
+      {
+        "__uuid__": "a3956664-d528-45c8-ad27-333a667cfaa9"
+      },
+      {
+        "__uuid__": "db090ea1-362f-4c0c-bf7d-e90b49fe3152"
+      }
+    ],
     "pauseDialogPrefab": {
       "__uuid__": "6eae918d-cc02-42c0-b784-12d806eec596"
     },

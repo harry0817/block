@@ -117,7 +117,8 @@ cc.Class({
      * 刷新
      */
     onRefreshBtnClick: function () {
-        this.game.refreshNewBlock();
+        // this.game.refreshNewBlock();
+        this.showCombo(4);
     },
 
     /**
@@ -130,20 +131,27 @@ cc.Class({
     showCombo: function (comboCount) {
         console.log('comboCount:' + comboCount);
 
+        if (this.comboAction != undefined && !this.comboAction.isDone()) {
+            return;
+        }
         if (comboCount >= 2) {
             let index = Math.min(this.comboSpriteFrameArr.length - 1, comboCount - 2);
-            this.comboSprite.node.active = true;
+            this.combo.active = true;
+            this.combo.scale = 0;
             this.comboSprite.spriteFrame = this.comboSpriteFrameArr[index];
-            this.comboSprite.node.opacity = 0;
-            let fadeIn = cc.fadeIn(0.5);
-            let fadeOut = cc.fadeOut(0.5);
-            let action = cc.sequence(
-                fadeIn,
-                cc.delayTime(2),
-                fadeOut, cc.callFunc(function () {
-                    this.comboSprite.active = false;
-                }, this));
-            this.comboSprite.node.runAction(action);
+
+            let inAction = cc.scaleTo(0.3, 1, 1);
+            inAction.easing(cc.easeBackOut());
+            let outAction = cc.scaleTo(0.3, 0, 0);
+            this.comboAction = cc.sequence(
+                inAction,
+                cc.delayTime(1),
+                outAction,
+                cc.callFunc(function () {
+                    this.combo.active = false;
+                }, this)
+            );
+            this.combo.runAction(this.comboAction);
         }
     },
 
