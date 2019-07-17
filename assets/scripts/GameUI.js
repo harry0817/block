@@ -1,5 +1,6 @@
 var GameData = require('GameData');
 var Types = require('Types');
+var GGManager = require('GGManager');
 
 cc.Class({
     extends: cc.Component,
@@ -118,14 +119,15 @@ cc.Class({
      */
     onRefreshBtnClick: function () {
         // this.game.refreshNewBlock();
-        this.showCombo(4);
+        GGManager.instance.showRewardedVideo();
     },
 
     /**
      * 锤子
      */
     onHammerBtnClick: function () {
-        this.game.setHammerEnabled(true);
+        // this.game.setHammerEnabled(true);
+        GGManager.instance.showInterAd();
     },
 
     showCombo: function (comboCount) {

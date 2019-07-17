@@ -1,4 +1,5 @@
 var HomeUI = require('HomeUI');
+var GGManager = require('GGManager');
 
 cc.Class({
     extends: cc.Component,
@@ -13,6 +14,8 @@ cc.Class({
         this.homeUI.init(this);
         cc.game.addPersistRootNode(this.dialogPanel);
         cc.director.preloadScene('Game');
+
+        GGManager.instance.init();
     },
 
     playGame: function () {

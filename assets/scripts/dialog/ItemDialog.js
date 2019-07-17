@@ -2,7 +2,6 @@ var BaseDialog = require('BaseDialog');
 var Types = require('Types');
 var i18n = require('LanguageData');
 var GameData = require('GameData');
-var AdManager = require('AdManager');
 
 cc.Class({
     extends: BaseDialog,
@@ -77,7 +76,6 @@ cc.Class({
 
     onWatchVideo: function () {
         //TODO
-        AdManager.instance.showRewardedVideo();
         
         this.onWatchVideoResult(true);
         this.dismiss();

@@ -3,6 +3,7 @@ var GameUI = require('GameUI');
 var GameData = require('GameData');
 var Types = require('Types');
 var BlockPointUtil = require('BlockPointUtil');
+var GGManager = require('GGManager');
 
 cc.Class({
     extends: cc.Component,
