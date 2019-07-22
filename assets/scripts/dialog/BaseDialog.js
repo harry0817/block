@@ -28,8 +28,8 @@ var BaseDialog = cc.Class({
     show: function () {
         let dialogPanel = cc.find('DialogPanel');
         if (dialogPanel != undefined) {
-            this.dialogManager = dialogPanel.getComponent('DialogManager');
-            this.node.parent = this.dialogManager.dialogRoot;
+            this.dialogMng = dialogPanel.getComponent('DialogMng');
+            this.node.parent = this.dialogMng.dialogRoot;
         }
     },
 

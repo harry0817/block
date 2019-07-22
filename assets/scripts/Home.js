@@ -1,5 +1,5 @@
 var HomeUI = require('HomeUI');
-var GGManager = require('GGManager');
+var AdMng = require('AdMng');
 
 cc.Class({
     extends: cc.Component,
@@ -15,7 +15,7 @@ cc.Class({
         cc.game.addPersistRootNode(this.dialogPanel);
         cc.director.preloadScene('Game');
 
-        GGManager.instance.init();
+        AdMng.instance.init();
     },
 
     playGame: function () {

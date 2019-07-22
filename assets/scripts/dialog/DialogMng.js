@@ -1,5 +1,5 @@
 
-var DialogManager = cc.Class({
+var DialogMng = cc.Class({
     extends: cc.Component,
 
     properties: {

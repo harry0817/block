@@ -1,6 +1,7 @@
 var BaseDialog = require('BaseDialog');
 var i18n = require('LanguageData');
 var GameData = require('GameData');
+var AdMng = require('AdMng');
 
 cc.Class({
     extends: BaseDialog,
@@ -22,8 +23,8 @@ cc.Class({
     setCoinCount: function (coinCount) {
         this.coinCount = coinCount;
         this.coinCountLabel.string = coinCount + '/10';
-        this.receiveLabel.string = i18n.t('receive_coin_dialog.btn_receive').replace('%s', coinCount);
-        this.videoLabel.string = i18n.t('receive_coin_dialog.btn_reward').replace('%s', coinCount + 'X10');
+        this.receiveLabel.string = i18n.t('receive_coin_dialog.btn_receive').replace('{0}', coinCount);
+        this.videoLabel.string = i18n.t('receive_coin_dialog.btn_reward').replace('{0}', coinCount + 'X10');
     },
 
     onReceive: function () {
@@ -32,34 +33,15 @@ cc.Class({
     },
 
     onWatchVideo: function () {
-        var preloadedRewardedVideo = null;
-
         console.log("onWatchVideo");
-        
         let self = this;
-        FBInstant.getRewardedVideoAsync(
-            '623450794796337_640112573130159', // Your Ad Placement Id
-        ).then(function (rewarded) {
-            // Load the Ad asynchronously
-            console.log('Load Rewarded video');
-            preloadedRewardedVideo = rewarded;
-            return preloadedRewardedVideo.loadAsync();
-        }).then(function () {
-            console.log('Rewarded video preloaded');
-            preloadedRewardedVideo.showAsync()
-                .then(function () {
-                    // Perform post-ad success operation
-                    console.log('Rewarded video watched successfully');
-                    self.onReceiveCoin(10 * this.coinCount);
-                    self.dismiss();
-                })
-                .catch(function (e) {
-                    console.error(e.message);
-                });
-
-        }).catch(function (err) {
-            console.error('Rewarded video failed to preload: ' + err.message);
+        AdMng.instance.showRewardedVideo(function (rewarded) {
+            if(rewarded){
+                self.onReceiveCoin(10 * self.coinCount);
+                self.dismiss();
+            }
         });
+       
     },
 
     onReceiveCoin: function (coinCount) {

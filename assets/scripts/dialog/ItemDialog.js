@@ -2,6 +2,7 @@ var BaseDialog = require('BaseDialog');
 var Types = require('Types');
 var i18n = require('LanguageData');
 var GameData = require('GameData');
+var AdMng = require('AdMng');
 
 cc.Class({
     extends: BaseDialog,
@@ -60,25 +61,25 @@ cc.Class({
     },
 
     onPurchase: function () {
-        // if (GameData.instance.coinCount >= 30) {
-        //     GameData.instance.coinCount -= 30;
-        //     this.onPurchaseResult(true);
-        //     this.game.gameUI.updateCoinCount();
-        //     this.dismiss();
-        // } else {
-        //     //TODO 提示金币不足
+        if (GameData.instance.coinCount >= 30) {
+            GameData.instance.coinCount -= 30;
+            this.onPurchaseResult(true);
+            this.game.gameUI.updateCoinCount();
+            this.dismiss();
+        } else {
+            //TODO 提示金币不足
 
-        // }
-
-        this.onPurchaseResult(true);
-        this.dismiss();
+        }
     },
 
     onWatchVideo: function () {
-        //TODO
-        
-        this.onWatchVideoResult(true);
-        this.dismiss();
+        let self = this;
+        AdMng.instance.showRewardedVideo(function (rewarded) {
+            if (rewarded) {
+                self.onWatchVideoResult(true);
+                self.dismiss();
+            }
+        });
     },
 
     onPurchaseResult: function (success) {

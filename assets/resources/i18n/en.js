@@ -36,7 +36,7 @@ window.i18n.languages['en'] = {
     'receive_coin_dialog': {
         'title': 'GET COINS',
         'now_you_have': 'NOW YOU HAVE',
-        'btn_receive': 'JUST GET %s coin',
-        'btn_reward': 'GET %s COINS'
+        'btn_receive': 'JUST GET {0} coin',
+        'btn_reward': 'GET {0} COINS'
     }
 };

@@ -1,6 +1,6 @@
 var GameData = require('GameData');
 var Types = require('Types');
-var GGManager = require('GGManager');
+var AdMng = require('AdMng');
 
 cc.Class({
     extends: cc.Component,
@@ -118,16 +118,14 @@ cc.Class({
      * 刷新
      */
     onRefreshBtnClick: function () {
-        // this.game.refreshNewBlock();
-        GGManager.instance.showRewardedVideo();
+        this.game.refreshNewBlock();
     },
 
     /**
      * 锤子
      */
     onHammerBtnClick: function () {
-        // this.game.setHammerEnabled(true);
-        GGManager.instance.showInterAd();
+        this.game.setHammerEnabled(true);
     },
 
     showCombo: function (comboCount) {
@@ -136,8 +134,8 @@ cc.Class({
         if (this.comboAction != undefined && !this.comboAction.isDone()) {
             return;
         }
-        if (comboCount >= 2) {
-            let index = Math.min(this.comboSpriteFrameArr.length - 1, comboCount - 2);
+        if (comboCount >= 3) {
+            let index = Math.min(this.comboSpriteFrameArr.length - 1, comboCount - 3);
             this.combo.active = true;
             this.combo.scale = 0;
             this.comboSprite.spriteFrame = this.comboSpriteFrameArr[index];

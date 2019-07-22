@@ -3,7 +3,7 @@ var GameUI = require('GameUI');
 var GameData = require('GameData');
 var Types = require('Types');
 var BlockPointUtil = require('BlockPointUtil');
-var GGManager = require('GGManager');
+var AdMng = require('AdMng');
 
 cc.Class({
     extends: cc.Component,
@@ -326,6 +326,8 @@ cc.Class({
             }
             //加分
             let upgradeAction = cc.callFunc(function () {
+                //震动
+                // cc.Device.vibrate();
                 for (let i = 0; i < this.tempUpgradeBlockArr.length; i++) {
                     let upgradeBlock = this.tempUpgradeBlockArr[i];
                     let point = upgradeBlock.point * Math.pow(2, upgradeBlock.combineBlockArr.length);
@@ -345,7 +347,7 @@ cc.Class({
                     upgradeBlock.clearCombineBlock();
                 }
             }, this);
-            let action = cc.sequence(cc.delayTime(this.normalMoveDuration), upgradeAction, cc.delayTime(0), cc.callFunc(this.settleBlock, this));
+            let action = cc.sequence(cc.delayTime(this.normalMoveDuration), upgradeAction, cc.delayTime(0.1), cc.callFunc(this.settleBlock, this));
             this.node.runAction(action);
         } else {
             this.generateNewBlock();

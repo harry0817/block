@@ -1,4 +1,5 @@
 var BaseDialog = require('BaseDialog');
+var GameData = require('GameData');
 
 cc.Class({
     extends: BaseDialog,
@@ -20,8 +21,18 @@ cc.Class({
     },
 
     onShare: function () {
-        this.dismiss();
         //TODO
+        FBInstant.shareAsync({
+            intent: 'SHARE',
+            image: '',
+            text: '来玩2048吧',
+            data: { myReplayData: '123' },
+        }).then(() => {
+            GameData.instance.coinCount += 1;
+            this.game.gameUI.updateCoinCount();
+            this.dismiss();
+        });
+
     },
 
     onNewGame: function () {
