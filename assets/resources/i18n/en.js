@@ -16,6 +16,8 @@ window.i18n.languages['en'] = {
     'continue': 'GO ON',
     'share': 'Share',
     'free': 'FREE',
+    'btn_receive': 'JUST GET {0} coin',
+    'btn_reward': 'GET {0} COINS',
     'item': {
         'bomb': 'Bomb',
         'rocket': 'Rocket',
@@ -36,7 +38,9 @@ window.i18n.languages['en'] = {
     'receive_coin_dialog': {
         'title': 'GET COINS',
         'now_you_have': 'NOW YOU HAVE',
-        'btn_receive': 'JUST GET {0} coin',
-        'btn_reward': 'GET {0} COINS'
+    },
+    'daily_reward_dialog': {
+        'title': 'DAILY GIFT',
+        'content': 'Enter the game from Facebook every day to get your gift'
     }
 };

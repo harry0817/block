@@ -16,6 +16,8 @@ cc.Class({
         cc.director.preloadScene('Game');
 
         AdMng.instance.init();
+
+        // this.homeUI.showDailyRewardDialog();
     },
 
     playGame: function () {

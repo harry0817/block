@@ -65,6 +65,8 @@ cc.Class({
 
     updateScore: function (score) {
         this.scoreLabel.string = score;
+
+        //TODO 动画
     },
 
     updateStoredCoinCount: function () {

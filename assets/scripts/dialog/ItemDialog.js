@@ -68,6 +68,7 @@ cc.Class({
             this.dismiss();
         } else {
             //TODO 提示金币不足
+            this.dismiss();
 
         }
     },

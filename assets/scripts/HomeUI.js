@@ -17,6 +17,7 @@ cc.Class({
         vibrationBtn: cc.Button,
         vibrationToggle: Toggle,
         shareBtn: cc.Button,
+        dailyRewardDialogPrefab: cc.Prefab
     },
 
     init(home) {
@@ -26,11 +27,8 @@ cc.Class({
     },
 
     initView: function () {
-        let bestScore = GameData.instance.bestScore;
-        this.bestScore.active = bestScore > 0;
-        this.bestScoreLabel.string = i18n.t('best_score') + ':' + GameData.instance.bestScore;
-        this.coinLabel.string = GameData.instance.coinCount;
-
+        this.updateScoreLabel();
+        this.updateCoinCount();
         this.soundToggle.setCheck(GameData.instance.sound == 'true');
         this.vibrationToggle.setCheck(GameData.instance.vibration == 'true');
     },
@@ -41,6 +39,16 @@ cc.Class({
         this.soundBtn.node.on('click', this.onSound, this);
         this.vibrationBtn.node.on('click', this.onVibration, this);
         this.shareBtn.node.on('click', this.onShare, this);
+    },
+
+    updateScoreLabel: function () {
+        let bestScore = GameData.instance.bestScore;
+        this.bestScore.active = bestScore > 0;
+        this.bestScoreLabel.string = i18n.t('best_score') + ':' + GameData.instance.bestScore;
+    },
+
+    updateCoinCount: function () {
+        this.coinLabel.string = GameData.instance.coinCount;
     },
 
     onPlayGame: function () {
@@ -75,7 +83,13 @@ cc.Class({
 
     onShare: function () {
 
-    }
+    },
+
+    showDailyRewardDialog : function () {
+        let dialogNode = cc.instantiate(this.dailyRewardDialogPrefab);
+        let dailyRewardDialog = dialogNode.getComponent('DailyRewardDialog');
+        dailyRewardDialog.show(this.home);
+    },
 
     // update (dt) {},
 });

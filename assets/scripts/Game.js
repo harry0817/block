@@ -685,7 +685,10 @@ cc.Class({
      */
     onHammer: function (block) {
         this.setHammerEnabled(false);
-
+        if (block.isCoin) {
+            return;
+        }
+        
         GameData.instance.hammerCount--;
         this.gameUI.updateItemCount();
 

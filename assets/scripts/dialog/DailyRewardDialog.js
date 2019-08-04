@@ -18,13 +18,14 @@ cc.Class({
         this._super();
         this.receiveBtn.node.on('click', this.onReceive, this);
         this.videoBtn.node.on('click', this.onWatchVideo, this);
+        this.setCoinCount(30);
     },
 
     setCoinCount: function (coinCount) {
         this.coinCount = coinCount;
-        this.coinCountLabel.string = coinCount + '/10';
+        this.coinCountLabel.string = 'x' + coinCount;
         this.receiveLabel.string = i18n.t('btn_receive').replace('{0}', coinCount);
-        this.videoLabel.string = i18n.t('btn_reward').replace('{0}', coinCount + 'x10');
+        this.videoLabel.string = i18n.t('btn_reward').replace('{0}', coinCount + 'x3');
     },
 
     onReceive: function () {
@@ -36,24 +37,21 @@ cc.Class({
         console.log("onWatchVideo");
         let self = this;
         AdMng.instance.showRewardedVideo(function (rewarded) {
-            if(rewarded){
-                self.onReceiveCoin(10 * self.coinCount);
+            if (rewarded) {
+                self.onReceiveCoin(3 * self.coinCount);
                 self.dismiss();
             }
         });
-       
     },
 
     onReceiveCoin: function (coinCount) {
         GameData.instance.coinCount += coinCount;
-        GameData.instance.storedCoinCount = 0;
-        this.game.gameUI.updateCoinCount();
-        this.game.gameUI.updateStoredCoinCount();
+        this.home.homeUI.updateCoinCount();
     },
 
-    show: function (game) {
+    show: function (home) {
         this._super();
-        this.game = game;
+        this.home = home;
     },
 
     // update (dt) {},

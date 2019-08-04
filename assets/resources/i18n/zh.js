@@ -16,6 +16,8 @@ window.i18n.languages['zh'] = {
     'continue': '继续',
     'share': '分享',
     'free': '免费',
+    'btn_receive': '只获取{0}个金币',
+    'btn_reward': '获取{0}个金币',
     'item': {
         'bomb': '炸弹',
         'rocket': '火箭',
@@ -35,8 +37,10 @@ window.i18n.languages['zh'] = {
     },
     'receive_coin_dialog': {
         'title': '获取金币',
-        'now_you_have': '你有',
-        'btn_receive': '只获取{0}个金币',
-        'btn_reward': '获取{0}个金币'
+        'now_you_have': '你有'
+    },
+    'daily_reward_dialog': {
+        'title': '每日奖励',
+        'content': '从Facebook登陆，获取你的每日奖励'
     }
 };
