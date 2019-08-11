@@ -20,6 +20,7 @@ cc.Class({
         blockSizeRatio: new cc.Vec2(),
         normalMoveDuration: 0.2,
         emissionDuration: 0.05,
+        combineInterval: 0.7,
         blockPanel: cc.Node,
         launchBasePrefab: cc.Prefab,
         blockPrefab: cc.Prefab,
@@ -94,7 +95,7 @@ cc.Class({
                 }
             }
             this.score = gameData.score;
-            this.gameUI.updateScore(this.score);
+            this.gameUI.updateScore(this.score, false);
             this.generateNewBlock(gameData.newBlockPoint);
             this.BlockPointUtil.set(gameData.highestPoint, gameData.highestExponent, gameData.reachHighestPointCount);
         }
@@ -168,6 +169,8 @@ cc.Class({
         }
         this.userCanOperate = true;
         this.BlockPointUtil.reset();
+        this.score = 0;
+        this.gameUI.updateScore(this.score, false);
         this.generateNewBlock();
     },
 
@@ -176,8 +179,6 @@ cc.Class({
         if (this.score > GameData.instance.bestScore) {
             GameData.instance.bestScore = this.score;
         }
-        this.score = 0;
-        this.gameUI.updateScore(this.score);
     },
 
     onblockPanelTouchEvent: function (event) {
@@ -228,7 +229,7 @@ cc.Class({
     },
 
     settleBlock: function (emission = false) {
-        console.log('settleBlock');
+        console.log('settleBlock, emission:' + emission);
         this.tempActionArr.splice(0, this.tempActionArr.length);
         this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
         for (let col = 0; col < this.blockArr[0].length; col++) {
@@ -272,7 +273,11 @@ cc.Class({
                         this.claimCoin();
                     }
                     if (i == this.tempActionArr.length - 1) {
-                        this.combineBlock();
+                        // this.scheduleOnce(this.combineBlock, emission ? 0 : this.combineInterval);
+                        // this.scheduleOnce(this.combineBlock, 0);
+                        this.scheduleOnce(function () {
+                            this.combineBlock(emission);
+                        }, 0);
                     }
                 }, this);
                 let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
@@ -280,7 +285,11 @@ cc.Class({
                 block.node.runAction(action);
             }
         } else {
-            this.scheduleOnce(this.combineBlock, 0);
+            // this.scheduleOnce(this.combineBlock, emission ? 0 : this.combineInterval);
+            // this.scheduleOnce(this.combineBlock, 0);
+            this.scheduleOnce(function () {
+                this.combineBlock(emission);
+            }, 0);
         }
     },
 
@@ -301,8 +310,8 @@ cc.Class({
         this.coinBlock.node.runAction(action);
     },
 
-    combineBlock: function () {
-        console.log('combineBlock');
+    combineBlock: function (emission = false) {
+        console.log('combineBlock, emission:' + emission);
         let tempMovingBlockArr = this.tempSettlingBlockArr.concat(this.tempUpgradeBlockArr);
         this.tempActionArr.splice(0, this.tempActionArr.length);
         this.tempSettlingBlockArr.splice(0, this.tempSettlingBlockArr.length);
@@ -321,7 +330,8 @@ cc.Class({
                 let block = movingAction.block;
                 console.log('move:' + block.toString() + ' to (' + movingAction.toRow + ',' + movingAction.toCol + ')');
                 let position = this.convertIndexToPosition(movingAction.toRow, movingAction.toCol);
-                let action = cc.moveTo(this.normalMoveDuration, position);
+                let moveAction = cc.moveTo(this.normalMoveDuration, position);
+                let action = cc.sequence(cc.delayTime(emission ? 0 : this.combineInterval), moveAction);
                 block.node.runAction(action);
             }
             //加分
@@ -347,7 +357,11 @@ cc.Class({
                     upgradeBlock.clearCombineBlock();
                 }
             }, this);
-            let action = cc.sequence(cc.delayTime(this.normalMoveDuration), upgradeAction, cc.delayTime(0.1), cc.callFunc(this.settleBlock, this));
+            // let action = cc.sequence(cc.delayTime(this.normalMoveDuration), upgradeAction, cc.delayTime(0.1), cc.callFunc(this.settleBlock, this, false));
+            let self = this;
+            let action = cc.sequence(cc.delayTime(this.normalMoveDuration + emission ? 0 : this.combineInterval), upgradeAction, cc.delayTime(0), cc.callFunc(function () {
+                self.settleBlock(false);
+            }));
             this.node.runAction(action);
         } else {
             this.generateNewBlock();
@@ -556,8 +570,8 @@ cc.Class({
             // && Utils.randomNum(99) >= 50
         ) {
             let colArr = [];
-            for (let col = 0; col < this.blockArr[0].length; col++) {
-                for (let row = 0; row < this.blockArr.length; row++) {
+            for (let col = 0; col < this.colCount; col++) {
+                for (let row = 0; row < this.rowCount; row++) {
                     let block = this.blockArr[row][col];
                     if (block == undefined) {
                         colArr.push([row, col]);
@@ -688,7 +702,7 @@ cc.Class({
         if (block.isCoin) {
             return;
         }
-        
+
         GameData.instance.hammerCount--;
         this.gameUI.updateItemCount();
 

@@ -34,6 +34,8 @@ cc.Class({
 
     init(game) {
         this.game = game;
+        this.score = 0;
+        this.tempScore = 0;
     },
 
     onLoad() {
@@ -63,10 +65,22 @@ cc.Class({
         this.refreshCountLabel.string = GameData.instance.refreshCount;
     },
 
-    updateScore: function (score) {
-        this.scoreLabel.string = score;
+    updateScore: function (newScore, anim = true) {
+        if (anim) {
+            this.tempScore = newScore;
+            cc.tween(this)
+                .to(0.3, { score: newScore })
+                .start();
+        } else {
+            this.score = newScore;
+            this.scoreLabel.string = newScore;
+        }
+    },
 
-        //TODO 动画
+    update(dt) {
+        if (this.tempScore != this.score) {
+            this.scoreLabel.string = Math.round(this.score);
+        }
     },
 
     updateStoredCoinCount: function () {
@@ -139,6 +153,7 @@ cc.Class({
         if (comboCount >= 3) {
             let index = Math.min(this.comboSpriteFrameArr.length - 1, comboCount - 3);
             this.combo.active = true;
+            this.combo.zIndex = 100;
             this.combo.scale = 0;
             this.comboSprite.spriteFrame = this.comboSpriteFrameArr[index];
 

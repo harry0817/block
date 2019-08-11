@@ -4454,7 +4454,7 @@
       "x": 180,
       "y": 160
     },
-    "normalMoveDuration": 0.2,
+    "normalMoveDuration": 0.1,
     "emissionDuration": 0.05,
     "blockPanel": {
       "__id__": 33
